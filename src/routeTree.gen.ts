@@ -16,6 +16,8 @@ import { Route as SlugBookRouteImport } from './routes/$slug/book'
 import { Route as SlugCarRouteImport } from './routes/$slug/car'
 import { Route as SlugManifestDotwebmanifestRouteImport } from './routes/$slug/manifest[.]webmanifest'
 import { Route as SlugRequestedRouteImport } from './routes/$slug/requested'
+import { Route as SlugTodayRouteImport } from './routes/$slug/today'
+import { Route as SlugInvoiceJobIdRouteImport } from './routes/$slug/invoice.$jobId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -53,6 +55,16 @@ const SlugRequestedRoute = SlugRequestedRouteImport.update({
   path: '/requested',
   getParentRoute: () => SlugRouteRoute,
 } as any)
+const SlugTodayRoute = SlugTodayRouteImport.update({
+  id: '/today',
+  path: '/today',
+  getParentRoute: () => SlugRouteRoute,
+} as any)
+const SlugInvoiceJobIdRoute = SlugInvoiceJobIdRouteImport.update({
+  id: '/invoice/$jobId',
+  path: '/invoice/$jobId',
+  getParentRoute: () => SlugRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,7 +73,9 @@ export interface FileRoutesByFullPath {
   '/$slug/car': typeof SlugCarRoute
   '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
   '/$slug/requested': typeof SlugRequestedRoute
+  '/$slug/today': typeof SlugTodayRoute
   '/$slug/': typeof SlugIndexRoute
+  '/$slug/invoice/$jobId': typeof SlugInvoiceJobIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -69,7 +83,9 @@ export interface FileRoutesByTo {
   '/$slug/car': typeof SlugCarRoute
   '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
   '/$slug/requested': typeof SlugRequestedRoute
+  '/$slug/today': typeof SlugTodayRoute
   '/$slug': typeof SlugIndexRoute
+  '/$slug/invoice/$jobId': typeof SlugInvoiceJobIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -79,7 +95,9 @@ export interface FileRoutesById {
   '/$slug/car': typeof SlugCarRoute
   '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
   '/$slug/requested': typeof SlugRequestedRoute
+  '/$slug/today': typeof SlugTodayRoute
   '/$slug/': typeof SlugIndexRoute
+  '/$slug/invoice/$jobId': typeof SlugInvoiceJobIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -90,7 +108,9 @@ export interface FileRouteTypes {
     | '/$slug/car'
     | '/$slug/manifest.webmanifest'
     | '/$slug/requested'
+    | '/$slug/today'
     | '/$slug/'
+    | '/$slug/invoice/$jobId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -98,7 +118,9 @@ export interface FileRouteTypes {
     | '/$slug/car'
     | '/$slug/manifest.webmanifest'
     | '/$slug/requested'
+    | '/$slug/today'
     | '/$slug'
+    | '/$slug/invoice/$jobId'
   id:
     | '__root__'
     | '/'
@@ -107,7 +129,9 @@ export interface FileRouteTypes {
     | '/$slug/car'
     | '/$slug/manifest.webmanifest'
     | '/$slug/requested'
+    | '/$slug/today'
     | '/$slug/'
+    | '/$slug/invoice/$jobId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -166,6 +190,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugRequestedRouteImport
       parentRoute: typeof SlugRouteRoute
     }
+    '/$slug/today': {
+      id: '/$slug/today'
+      path: '/today'
+      fullPath: '/$slug/today'
+      preLoaderRoute: typeof SlugTodayRouteImport
+      parentRoute: typeof SlugRouteRoute
+    }
+    '/$slug/invoice/$jobId': {
+      id: '/$slug/invoice/$jobId'
+      path: '/invoice/$jobId'
+      fullPath: '/$slug/invoice/$jobId'
+      preLoaderRoute: typeof SlugInvoiceJobIdRouteImport
+      parentRoute: typeof SlugRouteRoute
+    }
   }
 }
 
@@ -174,7 +212,9 @@ interface SlugRouteRouteChildren {
   SlugCarRoute: typeof SlugCarRoute
   SlugManifestDotwebmanifestRoute: typeof SlugManifestDotwebmanifestRoute
   SlugRequestedRoute: typeof SlugRequestedRoute
+  SlugTodayRoute: typeof SlugTodayRoute
   SlugIndexRoute: typeof SlugIndexRoute
+  SlugInvoiceJobIdRoute: typeof SlugInvoiceJobIdRoute
 }
 
 const SlugRouteRouteChildren: SlugRouteRouteChildren = {
@@ -182,7 +222,9 @@ const SlugRouteRouteChildren: SlugRouteRouteChildren = {
   SlugCarRoute: SlugCarRoute,
   SlugManifestDotwebmanifestRoute: SlugManifestDotwebmanifestRoute,
   SlugRequestedRoute: SlugRequestedRoute,
+  SlugTodayRoute: SlugTodayRoute,
   SlugIndexRoute: SlugIndexRoute,
+  SlugInvoiceJobIdRoute: SlugInvoiceJobIdRoute,
 }
 
 const SlugRouteRouteWithChildren = SlugRouteRoute._addFileChildren(

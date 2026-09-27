@@ -206,14 +206,16 @@ function HistoryItem({ job, taxRate }: { job: Job; taxRate: number }) {
           ) : null}
 
           {job.invoice_no ? (
-            <a
-              href={`/invoices/${job.invoice_no}.pdf`}
+            <Link
+              to="/$slug/invoice/$jobId"
+              params={{ slug: workshopSlug, jobId: job.id }}
               className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-brand"
             >
               <FileText className="h-4 w-4" />
               View invoice {job.invoice_no}
-            </a>
+            </Link>
           ) : null}
+
         </div>
       ) : null}
     </div>
