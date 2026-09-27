@@ -109,7 +109,7 @@ export function BrandButton({
   onClick?: () => void;
   type?: "button" | "submit";
   disabled?: boolean;
-  className?: string;
+  className?: string | undefined;
 }) {
   return (
     <button
