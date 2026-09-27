@@ -3,32 +3,32 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { signInWithCode } from "@/lib/auth";
-import { BrandButton } from "@/components/app/workshop-ui";
+import { BrandButton, useWorkshop } from "@/components/app/workshop-ui";
 import { InstallHint } from "@/components/app/install-hint";
 
 export const Route = createFileRoute("/$slug/")({
-  component: SignIn,
+  head: ({ params }) => ({
+    meta: [
+      { title: "Sign in" },
+      {
+        name: "description",
+        content: `Sign in with your mobile number to see your car at ${params.slug}.`,
+      },
+      { property: "og:title", content: "Sign in" },
+      {
+        property: "og:description",
+        content: "Sign in with your mobile number to see your car and book a service.",
+      },
+    ],
+  }),
+  component: SignInScreen,
 });
 
-function SignIn() {
-  const { workshop } = Route.useLoaderData({ from: "/$slug" } as never) as never as {
-    workshop: never;
-  };
-  return <SignInBody />;
-}
-
-function SignInBody() {
+function SignInScreen() {
   const { slug } = Route.useParams();
-  const { workshop } = Route.useRouteContext({
-    select: () => ({ workshop: undefined }),
-  }) as unknown as { workshop: undefined };
-  return <SignInScreen slug={slug} />;
-}
-
-function SignInScreen({ slug }: { slug: string }) {
+  const workshop = useWorkshop();
   const navigate = useNavigate();
-  const parent = Route.useMatch({ select: (m) => m.id });
-  const workshop = useWorkshopFromLoader();
+
   const [step, setStep] = useState<"mobile" | "code">("mobile");
   const [mobile, setMobile] = useState("");
   const [code, setCode] = useState("");
@@ -41,7 +41,7 @@ function SignInScreen({ slug }: { slug: string }) {
   }, [navigate, slug]);
 
   const mobileValid = mobile.replace(/\D/g, "").length === 8;
-  const codeValid = code.replace(/\D/g, "").length === 6;
+  const codeValid = code.length === 6;
 
   async function submitCode() {
     setBusy(true);
@@ -50,7 +50,6 @@ function SignInScreen({ slug }: { slug: string }) {
       navigate({ to: "/$slug/car", params: { slug } });
     } catch {
       toast.error("We couldn't sign you in. Please try again.");
-    } finally {
       setBusy(false);
     }
   }
@@ -64,7 +63,7 @@ function SignInScreen({ slug }: { slug: string }) {
             alt={workshop.name}
             width={88}
             height={88}
-            className="h-22 w-22 rounded-2xl object-cover"
+            className="rounded-2xl object-cover"
             style={{ height: 88, width: 88 }}
           />
         ) : null}
@@ -117,11 +116,11 @@ function SignInScreen({ slug }: { slug: string }) {
               id="code"
               inputMode="numeric"
               autoComplete="one-time-code"
-              placeholder="······"
+              placeholder="000000"
               value={code}
               maxLength={6}
-              onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))}
-              className="mt-3 min-h-[56px] w-full rounded-md border border-input bg-card px-3 text-center text-2xl tracking-[0.5em] outline-none"
+              onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
+              className="mt-3 min-h-[56px] w-full rounded-md border border-input bg-card px-3 text-center text-2xl tracking-[0.4em] outline-none"
             />
             <BrandButton type="submit" disabled={!codeValid || busy} className="mt-5">
               {busy ? "Signing in…" : "Sign in"}
@@ -144,23 +143,11 @@ function SignInScreen({ slug }: { slug: string }) {
         <InstallHint slug={slug} workshopName={workshop.name} />
       </div>
 
-      <p className="mt-auto pt-8 text-center text-xs text-muted-foreground">
+      <p className="mt-auto pt-8 text-center text-xs leading-relaxed text-muted-foreground">
         {workshop.address}
         <br />
         {workshop.phone}
       </p>
-      <span className="hidden">{parent}</span>
     </main>
   );
-}
-
-function useWorkshopFromLoader() {
-  return Route.useLoaderData({ from: "/$slug" }) as unknown as {
-    workshop: {
-      name: string;
-      logo_url: string | null;
-      address: string;
-      phone: string;
-    };
-  }.workshop;
 }
