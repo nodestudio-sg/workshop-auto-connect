@@ -120,7 +120,13 @@ function MyCar() {
 
         <div className="space-y-3">
           {history.map((job) => (
-            <HistoryItem key={job.id} job={job} taxRate={Number(workshop.tax_rate)} />
+            <HistoryItem
+              key={job.id}
+              job={job}
+              slug={slug}
+              taxRate={Number(workshop.tax_rate)}
+            />
+
           ))}
           {history.length === 0 ? (
             <Card>
