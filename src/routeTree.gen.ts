@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SlugRouteRouteImport } from './routes/$slug/route'
 import { Route as SlugIndexRouteImport } from './routes/$slug/index'
+import { Route as SlugBookRouteImport } from './routes/$slug/book'
 import { Route as SlugCarRouteImport } from './routes/$slug/car'
 import { Route as SlugManifestDotwebmanifestRouteImport } from './routes/$slug/manifest[.]webmanifest'
+import { Route as SlugRequestedRouteImport } from './routes/$slug/requested'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -30,6 +32,11 @@ const SlugIndexRoute = SlugIndexRouteImport.update({
   path: '/',
   getParentRoute: () => SlugRouteRoute,
 } as any)
+const SlugBookRoute = SlugBookRouteImport.update({
+  id: '/book',
+  path: '/book',
+  getParentRoute: () => SlugRouteRoute,
+} as any)
 const SlugCarRoute = SlugCarRouteImport.update({
   id: '/car',
   path: '/car',
@@ -41,40 +48,65 @@ const SlugManifestDotwebmanifestRoute =
     path: '/manifest.webmanifest',
     getParentRoute: () => SlugRouteRoute,
   } as any)
+const SlugRequestedRoute = SlugRequestedRouteImport.update({
+  id: '/requested',
+  path: '/requested',
+  getParentRoute: () => SlugRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRouteRouteWithChildren
+  '/$slug/book': typeof SlugBookRoute
   '/$slug/car': typeof SlugCarRoute
   '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
+  '/$slug/requested': typeof SlugRequestedRoute
   '/$slug/': typeof SlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$slug/book': typeof SlugBookRoute
   '/$slug/car': typeof SlugCarRoute
   '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
+  '/$slug/requested': typeof SlugRequestedRoute
   '/$slug': typeof SlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$slug': typeof SlugRouteRouteWithChildren
+  '/$slug/book': typeof SlugBookRoute
   '/$slug/car': typeof SlugCarRoute
   '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
+  '/$slug/requested': typeof SlugRequestedRoute
   '/$slug/': typeof SlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/$slug' | '/$slug/car' | '/$slug/manifest.webmanifest' | '/$slug/'
+    | '/'
+    | '/$slug'
+    | '/$slug/book'
+    | '/$slug/car'
+    | '/$slug/manifest.webmanifest'
+    | '/$slug/requested'
+    | '/$slug/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$slug/car' | '/$slug/manifest.webmanifest' | '/$slug'
+  to:
+    | '/'
+    | '/$slug/book'
+    | '/$slug/car'
+    | '/$slug/manifest.webmanifest'
+    | '/$slug/requested'
+    | '/$slug'
   id:
     | '__root__'
     | '/'
     | '/$slug'
+    | '/$slug/book'
     | '/$slug/car'
     | '/$slug/manifest.webmanifest'
+    | '/$slug/requested'
     | '/$slug/'
   fileRoutesById: FileRoutesById
 }
@@ -106,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugIndexRouteImport
       parentRoute: typeof SlugRouteRoute
     }
+    '/$slug/book': {
+      id: '/$slug/book'
+      path: '/book'
+      fullPath: '/$slug/book'
+      preLoaderRoute: typeof SlugBookRouteImport
+      parentRoute: typeof SlugRouteRoute
+    }
     '/$slug/car': {
       id: '/$slug/car'
       path: '/car'
@@ -120,18 +159,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugManifestDotwebmanifestRouteImport
       parentRoute: typeof SlugRouteRoute
     }
+    '/$slug/requested': {
+      id: '/$slug/requested'
+      path: '/requested'
+      fullPath: '/$slug/requested'
+      preLoaderRoute: typeof SlugRequestedRouteImport
+      parentRoute: typeof SlugRouteRoute
+    }
   }
 }
 
 interface SlugRouteRouteChildren {
+  SlugBookRoute: typeof SlugBookRoute
   SlugCarRoute: typeof SlugCarRoute
   SlugManifestDotwebmanifestRoute: typeof SlugManifestDotwebmanifestRoute
+  SlugRequestedRoute: typeof SlugRequestedRoute
   SlugIndexRoute: typeof SlugIndexRoute
 }
 
 const SlugRouteRouteChildren: SlugRouteRouteChildren = {
+  SlugBookRoute: SlugBookRoute,
   SlugCarRoute: SlugCarRoute,
   SlugManifestDotwebmanifestRoute: SlugManifestDotwebmanifestRoute,
+  SlugRequestedRoute: SlugRequestedRoute,
   SlugIndexRoute: SlugIndexRoute,
 }
 
