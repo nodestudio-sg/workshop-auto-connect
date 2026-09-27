@@ -1,9 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { signInWithCode } from "@/lib/auth";
-import { BrandButton, useWorkshop } from "@/components/app/workshop-ui";
+import { cleanMobile, requestCode, verifyCode } from "@/lib/auth";
+import { fetchCustomer } from "@/lib/customer";
+import { isDemoSignInActive } from "@/lib/demo-mode";
+import { BrandButton, Pill, useWorkshop } from "@/components/app/workshop-ui";
 import { InstallHint } from "@/components/app/install-hint";
 
 export const Route = createFileRoute("/$slug/")({
@@ -34,22 +37,48 @@ function SignInScreen() {
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
 
+  // Demo sign-in only when DEMO_MODE is on in code AND this workshop is
+  // flagged in the database. Until that answers, the real OTP path is used.
+  const { data: demo = false, isPending: demoPending } = useQuery({
+    queryKey: ["demo-sign-in", workshop.id],
+    queryFn: () => isDemoSignInActive(workshop.id),
+    staleTime: Infinity,
+  });
+
+  // Skip sign-in only if the session already belongs to a customer of THIS
+  // workshop. A session from another workshop's link must still sign in here,
+  // or the car screen would bounce straight back.
   useEffect(() => {
-    void supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/$slug/car", params: { slug } });
+    void supabase.auth.getSession().then(async ({ data }) => {
+      if (data.session && (await fetchCustomer(slug))) {
+        navigate({ to: "/$slug/car", params: { slug } });
+      }
     });
   }, [navigate, slug]);
 
-  const mobileValid = mobile.replace(/\D/g, "").length === 8;
+  const mobileValid = cleanMobile(mobile).length === 8;
   const codeValid = code.length === 6;
+
+  async function sendCode() {
+    setBusy(true);
+    try {
+      await requestCode(mobile, demo);
+      setCode("");
+      setStep("code");
+    } catch {
+      toast.error("We couldn't send a code just now. Please try again in a moment.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submitCode() {
     setBusy(true);
     try {
-      await signInWithCode(slug, mobile);
+      await verifyCode(slug, mobile, code, demo);
       navigate({ to: "/$slug/car", params: { slug } });
     } catch {
-      toast.error("We couldn't sign you in. Please try again.");
+      toast.error("That code didn't work, or it has expired. Please try again.");
       setBusy(false);
     }
   }
@@ -72,11 +101,16 @@ function SignInScreen() {
       </div>
 
       <div className="app-card mt-8 p-5">
+        {demo ? (
+          <div className="mb-4">
+            <Pill>Demo sign-in</Pill>
+          </div>
+        ) : null}
         {step === "mobile" ? (
           <form
             onSubmit={(event) => {
               event.preventDefault();
-              if (mobileValid) setStep("code");
+              if (mobileValid && !busy && !demoPending) void sendCode();
             }}
           >
             <label htmlFor="mobile" className="text-sm font-medium">
@@ -95,10 +129,16 @@ function SignInScreen() {
               />
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              We'll send you a 6-digit code to sign in.
+              {demo
+                ? "Demo: no code is sent. Any 6-digit code signs you in."
+                : "We'll send you a 6-digit code to sign in."}
             </p>
-            <BrandButton type="submit" disabled={!mobileValid} className="mt-5">
-              Send code
+            <BrandButton
+              type="submit"
+              disabled={!mobileValid || busy || demoPending}
+              className="mt-5"
+            >
+              {busy ? "Sending…" : "Send code"}
             </BrandButton>
           </form>
         ) : (
@@ -111,7 +151,9 @@ function SignInScreen() {
             <label htmlFor="code" className="text-sm font-medium">
               Enter the 6-digit code
             </label>
-            <p className="mt-1 text-xs text-muted-foreground">Sent to +65 {mobile}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {demo ? `Demo: any 6-digit code works for +65 ${mobile}` : `Sent to +65 ${mobile}`}
+            </p>
             <input
               id="code"
               inputMode="numeric"
