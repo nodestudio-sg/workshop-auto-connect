@@ -32,7 +32,7 @@ export const Route = createFileRoute("/$slug/manifest.webmanifest")({
         const manifest = {
           id: `/${data.slug}/`,
           name: data.name,
-          short_name: data.name.length > 12 ? data.name.split(" ")[0] : data.name,
+          short_name: data.name,
           description: `Book servicing and follow your car's progress at ${data.name}.`,
           start_url: `/${data.slug}/`,
           scope: `/${data.slug}/`,
