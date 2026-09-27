@@ -46,7 +46,7 @@ function RequestSent() {
 
   if (isLoading) return <Loading />;
 
-  const snapshot = ((data?.price_snapshot ?? []) as unknown as Snapshot[]) ?? [];
+  const snapshot = (data?.price_snapshot ?? []) as unknown as Snapshot[];
   const total = Number(data?.estimate_total ?? 0);
 
   return (

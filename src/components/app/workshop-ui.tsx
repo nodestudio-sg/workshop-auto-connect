@@ -21,7 +21,7 @@ export function TopBar({
   backTo,
   showSignOut = false,
 }: {
-  backTo?: { to: string; params?: Record<string, string> };
+  backTo?: { to: "/$slug/car"; params: { slug: string } };
   showSignOut?: boolean;
 }) {
   const workshop = useWorkshop();
@@ -40,6 +40,7 @@ export function TopBar({
             <ChevronLeft className="h-6 w-6" />
           </Link>
         ) : null}
+
         {workshop.logo_url ? (
           <img
             src={workshop.logo_url}
