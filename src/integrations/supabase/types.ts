@@ -14,13 +14,362 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      booking_requests: {
+        Row: {
+          created_at: string
+          customer_id: string
+          estimate_total: number
+          id: string
+          preferred_date: string
+          preferred_time: string
+          price_snapshot: Json
+          service_ids: Json
+          status: string
+          vehicle_id: string
+          workshop_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          estimate_total?: number
+          id?: string
+          preferred_date: string
+          preferred_time: string
+          price_snapshot?: Json
+          service_ids?: Json
+          status?: string
+          vehicle_id: string
+          workshop_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          estimate_total?: number
+          id?: string
+          preferred_date?: string
+          preferred_time?: string
+          price_snapshot?: Json
+          service_ids?: Json
+          status?: string
+          vehicle_id?: string
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_requests_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_requests_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          created_at: string
+          id: string
+          mobile: string
+          name: string
+          user_id: string | null
+          workshop_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mobile: string
+          name: string
+          user_id?: string | null
+          workshop_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mobile?: string
+          name?: string
+          user_id?: string | null
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jobs: {
+        Row: {
+          created_at: string
+          extra_work: Json | null
+          id: string
+          invoice_no: string | null
+          is_active: boolean
+          line_items: Json
+          mileage_km: number | null
+          paid: boolean
+          photos: Json
+          service_date: string
+          stage_times: Json
+          status: string
+          title: string
+          total: number
+          vehicle_id: string
+          workshop_id: string
+        }
+        Insert: {
+          created_at?: string
+          extra_work?: Json | null
+          id?: string
+          invoice_no?: string | null
+          is_active?: boolean
+          line_items?: Json
+          mileage_km?: number | null
+          paid?: boolean
+          photos?: Json
+          service_date?: string
+          stage_times?: Json
+          status?: string
+          title: string
+          total?: number
+          vehicle_id: string
+          workshop_id: string
+        }
+        Update: {
+          created_at?: string
+          extra_work?: Json | null
+          id?: string
+          invoice_no?: string | null
+          is_active?: boolean
+          line_items?: Json
+          mileage_km?: number | null
+          paid?: boolean
+          photos?: Json
+          service_date?: string
+          stage_times?: Json
+          status?: string
+          title?: string
+          total?: number
+          vehicle_id?: string
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jobs_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          components: Json
+          description: string | null
+          id: string
+          name: string
+          price: number
+          quote_after_inspection: boolean
+          sort_order: number
+          workshop_id: string
+        }
+        Insert: {
+          components?: Json
+          description?: string | null
+          id?: string
+          name: string
+          price?: number
+          quote_after_inspection?: boolean
+          sort_order?: number
+          workshop_id: string
+        }
+        Update: {
+          components?: Json
+          description?: string | null
+          id?: string
+          name?: string
+          price?: number
+          quote_after_inspection?: boolean
+          sort_order?: number
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicles: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          make: string
+          mileage_km: number
+          model: string
+          next_service_due_date: string | null
+          next_service_due_km: number | null
+          oil_filter: string | null
+          oil_grade: string | null
+          oil_litres: number | null
+          plate: string
+          workshop_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          make: string
+          mileage_km?: number
+          model: string
+          next_service_due_date?: string | null
+          next_service_due_km?: number | null
+          oil_filter?: string | null
+          oil_grade?: string | null
+          oil_litres?: number | null
+          plate: string
+          workshop_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          make?: string
+          mileage_km?: number
+          model?: string
+          next_service_due_date?: string | null
+          next_service_due_km?: number | null
+          oil_filter?: string | null
+          oil_grade?: string | null
+          oil_litres?: number | null
+          plate?: string
+          workshop_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workshop_slots: {
+        Row: {
+          available: boolean
+          id: string
+          slot_date: string
+          slot_time: string
+          workshop_id: string
+        }
+        Insert: {
+          available?: boolean
+          id?: string
+          slot_date: string
+          slot_time: string
+          workshop_id: string
+        }
+        Update: {
+          available?: boolean
+          id?: string
+          slot_date?: string
+          slot_time?: string
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workshop_slots_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workshops: {
+        Row: {
+          address: string
+          brand_color: string
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          phone: string
+          slug: string
+          tax_rate: number
+        }
+        Insert: {
+          address: string
+          brand_color?: string
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          phone: string
+          slug: string
+          tax_rate?: number
+        }
+        Update: {
+          address?: string
+          brand_color?: string
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          phone?: string
+          slug?: string
+          tax_rate?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      approve_extra_work: { Args: { _job_id: string }; Returns: undefined }
+      link_customer: {
+        Args: { _mobile: string; _slug: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
