@@ -147,7 +147,16 @@ function MyCar() {
   );
 }
 
-function HistoryItem({ job, taxRate }: { job: Job; taxRate: number }) {
+function HistoryItem({
+  job,
+  slug: workshopSlug,
+  taxRate,
+}: {
+  job: Job;
+  slug: string;
+  taxRate: number;
+}) {
+
   const [open, setOpen] = useState(false);
 
   return (

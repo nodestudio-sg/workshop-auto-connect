@@ -15,9 +15,10 @@ import {
   Pill,
   TaxNote,
   TopBar,
+  useWorkshop,
 } from "@/components/app/workshop-ui";
-import { useWorkshop } from "@/components/app/workshop-ui";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/$slug/book")({
   head: () => ({
