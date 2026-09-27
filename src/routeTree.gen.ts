@@ -10,33 +10,44 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SlugManifestDotwebmanifestRouteImport } from './routes/$slug/manifest[.]webmanifest'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SlugManifestDotwebmanifestRoute =
+  SlugManifestDotwebmanifestRouteImport.update({
+    id: '/$slug/manifest.webmanifest',
+    path: '/$slug/manifest.webmanifest',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/$slug/manifest.webmanifest'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/$slug/manifest.webmanifest'
+  id: '__root__' | '/' | '/$slug/manifest.webmanifest'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SlugManifestDotwebmanifestRoute: typeof SlugManifestDotwebmanifestRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +59,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$slug/manifest.webmanifest': {
+      id: '/$slug/manifest.webmanifest'
+      path: '/$slug/manifest.webmanifest'
+      fullPath: '/$slug/manifest.webmanifest'
+      preLoaderRoute: typeof SlugManifestDotwebmanifestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SlugManifestDotwebmanifestRoute: SlugManifestDotwebmanifestRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
