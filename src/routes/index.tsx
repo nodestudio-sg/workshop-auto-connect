@@ -1,24 +1,38 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Workshop customer app" },
+      {
+        name: "description",
+        content:
+          "Open the link your car workshop sent you to book servicing and follow your car's progress.",
+      },
+      { property: "og:title", content: "Workshop customer app" },
+      {
+        property: "og:description",
+        content: "Open the link your car workshop sent you to view your car and book servicing.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="flex min-h-[100dvh] items-center justify-center bg-background px-5 py-10">
+      <div className="app-card w-full max-w-[420px] px-6 py-8 text-center">
+        <h1 className="text-lg font-semibold">Please open your workshop's own link</h1>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+          This app is used through the link your car workshop gave you, for example
+          <span className="text-foreground"> /sgcarservices</span>. Open that link on your phone to
+          see your car and book a service.
+        </p>
+      </div>
+    </main>
   );
 }
