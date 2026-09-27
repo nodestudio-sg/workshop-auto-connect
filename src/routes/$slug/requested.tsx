@@ -32,12 +32,13 @@ function RequestSent() {
   const workshop = useWorkshop();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["booking", id],
+    queryKey: ["booking", workshop.id, id],
     queryFn: async () => {
       const { data: row } = await supabase
         .from("booking_requests")
         .select("*")
         .eq("id", id)
+        .eq("workshop_id", workshop.id)
         .maybeSingle();
       return row;
     },
