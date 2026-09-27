@@ -157,7 +157,7 @@ function Today() {
         </Card>
 
         {extra ? (
-          <Card className={pendingExtra ? "border-attention" : undefined}>
+          <Card className={pendingExtra ? "border-attention" : ""}>
             <div className="flex items-start justify-between gap-2">
               <h2 className="text-sm font-bold">Extra work found: {extra.title}</h2>
               {pendingExtra ? <Pill>Needs your OK</Pill> : <Pill tone="success">Approved</Pill>}
