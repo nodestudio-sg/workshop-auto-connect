@@ -19,7 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
  * this file says. Before a workshop goes live with real customers, set its
  * `demo_mode` to false in the database.
  */
-export const DEMO_MODE = false;
+export const DEMO_MODE = true;
 
 /**
  * Whether the demo sign-in is active for this workshop. Anything unexpected —
