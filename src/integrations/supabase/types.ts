@@ -16,41 +16,68 @@ export type Database = {
     Tables: {
       booking_requests: {
         Row: {
+          confirmed_at: string | null
+          confirmed_date: string | null
+          confirmed_time: string | null
           created_at: string
           customer_id: string
+          customer_notes: string | null
           estimate_total: number
           id: string
+          idempotency_key: string | null
           preferred_date: string
           preferred_time: string
           price_snapshot: Json
           service_ids: Json
           status: string
+          subtotal_cents: number | null
+          tax_cents: number | null
+          tax_rate: number | null
+          total_cents: number | null
           vehicle_id: string
           workshop_id: string
         }
         Insert: {
+          confirmed_at?: string | null
+          confirmed_date?: string | null
+          confirmed_time?: string | null
           created_at?: string
           customer_id: string
+          customer_notes?: string | null
           estimate_total?: number
           id?: string
+          idempotency_key?: string | null
           preferred_date: string
           preferred_time: string
           price_snapshot?: Json
           service_ids?: Json
           status?: string
+          subtotal_cents?: number | null
+          tax_cents?: number | null
+          tax_rate?: number | null
+          total_cents?: number | null
           vehicle_id: string
           workshop_id: string
         }
         Update: {
+          confirmed_at?: string | null
+          confirmed_date?: string | null
+          confirmed_time?: string | null
           created_at?: string
           customer_id?: string
+          customer_notes?: string | null
           estimate_total?: number
           id?: string
+          idempotency_key?: string | null
           preferred_date?: string
           preferred_time?: string
           price_snapshot?: Json
           service_ids?: Json
           status?: string
+          subtotal_cents?: number | null
+          tax_cents?: number | null
+          tax_rate?: number | null
+          total_cents?: number | null
           vehicle_id?: string
           workshop_id?: string
         }
@@ -63,11 +90,32 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "booking_requests_customer_same_workshop_fkey"
+            columns: ["customer_id", "workshop_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id", "workshop_id"]
+          },
+          {
             foreignKeyName: "booking_requests_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_requests_vehicle_of_customer_fkey"
+            columns: ["vehicle_id", "customer_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id", "customer_id"]
+          },
+          {
+            foreignKeyName: "booking_requests_vehicle_same_workshop_fkey"
+            columns: ["vehicle_id", "workshop_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id", "workshop_id"]
           },
           {
             foreignKeyName: "booking_requests_workshop_id_fkey"
@@ -177,6 +225,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "jobs_vehicle_same_workshop_fkey"
+            columns: ["vehicle_id", "workshop_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id", "workshop_id"]
+          },
+          {
             foreignKeyName: "jobs_workshop_id_fkey"
             columns: ["workshop_id"]
             isOneToOne: false
@@ -284,6 +339,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "vehicles_customer_same_workshop_fkey"
+            columns: ["customer_id", "workshop_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id", "workshop_id"]
+          },
+          {
             foreignKeyName: "vehicles_workshop_id_fkey"
             columns: ["workshop_id"]
             isOneToOne: false
@@ -329,6 +391,7 @@ export type Database = {
           address: string
           brand_color: string
           created_at: string
+          demo_mode: boolean
           id: string
           logo_url: string | null
           name: string
@@ -340,6 +403,7 @@ export type Database = {
           address: string
           brand_color?: string
           created_at?: string
+          demo_mode?: boolean
           id?: string
           logo_url?: string | null
           name: string
@@ -351,6 +415,7 @@ export type Database = {
           address?: string
           brand_color?: string
           created_at?: string
+          demo_mode?: boolean
           id?: string
           logo_url?: string | null
           name?: string
@@ -365,11 +430,50 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_vehicle: {
+        Args: {
+          _make: string
+          _mileage_km: number
+          _model: string
+          _plate: string
+          _workshop_id: string
+          _year: number
+        }
+        Returns: string
+      }
       approve_extra_work: { Args: { _job_id: string }; Returns: undefined }
       link_customer: {
         Args: { _mobile: string; _slug: string }
         Returns: string
       }
+      submit_booking_request:
+        | {
+            Args: {
+              _customer_id: string
+              _idempotency_key: string
+              _preferred_date: string
+              _preferred_time: string
+              _service_ids: string[]
+              _shown_total_cents: number
+              _vehicle_id: string
+              _workshop_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _customer_id: string
+              _idempotency_key: string
+              _notes: string
+              _preferred_date: string
+              _preferred_time: string
+              _service_ids: string[]
+              _shown_total_cents: number
+              _vehicle_id: string
+              _workshop_id: string
+            }
+            Returns: string
+          }
     }
     Enums: {
       [_ in never]: never
