@@ -1,13 +1,25 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Car, KeyRound, LogOut, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import {
+  Building2,
+  Car,
+  KeyRound,
+  LogOut,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Pencil,
+  Phone,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCustomer } from "@/hooks/use-customer";
 import { isDemoAccountEmail, setEmailAndPassword, signOut } from "@/lib/auth";
 import { BrandButton, Loading, Pill, useWorkshop } from "@/components/app/workshop-ui";
 import { InstallHint } from "@/components/app/install-hint";
+import { PROFILE_ERRORS, ProfileForm } from "@/components/app/profile-form";
+import { ProfileError, updateMyProfile, type Customer } from "@/lib/customer";
 import {
   directionsUrl,
   phoneLinks,
@@ -40,7 +52,7 @@ function Account() {
 
   if (isLoading || !data) return <Loading />;
 
-  const { customer, vehicle } = data;
+  const { customer, vehicles } = data;
   const links = phoneLinks(workshop.phone);
   const email = userQuery.data?.email ?? null;
   const demoAccount = isDemoAccountEmail(email);
@@ -49,20 +61,12 @@ function Account() {
     <>
       <ScreenHeader title="Account" />
       <main className="mx-auto w-full max-w-[420px] space-y-3 px-4 pb-28 pt-3">
-        <div className="app-card flex items-center gap-4 p-4">
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-border bg-brand-soft text-xl font-semibold text-brand-strong">
-            {customer.name[0]?.toUpperCase()}
-          </span>
-          <div className="min-w-0">
-            <p className="truncate text-base font-semibold">{customer.name}</p>
-            <p className="text-sm text-muted-foreground">+65 {customer.mobile}</p>
-            {vehicle ? (
-              <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-                <Car className="h-3.5 w-3.5" /> {vehicle.plate} · {vehicle.make} {vehicle.model}
-              </p>
-            ) : null}
-          </div>
-        </div>
+        <ProfileCard
+          slug={slug}
+          workshopId={workshop.id}
+          customer={customer}
+          carCount={vehicles.length}
+        />
 
         <SectionTitle>Sign-in</SectionTitle>
         <div className="app-card divide-y divide-border">
@@ -83,7 +87,11 @@ function Account() {
               </div>
             </div>
           ) : (
-            <EmailPasswordForm currentEmail={email} onSaved={() => void userQuery.refetch()} />
+            <EmailPasswordForm
+              currentEmail={email}
+              suggestedEmail={customer.email}
+              onSaved={() => void userQuery.refetch()}
+            />
           )}
         </div>
 
@@ -149,13 +157,15 @@ function ContactRow({
 
 function EmailPasswordForm({
   currentEmail,
+  suggestedEmail,
   onSaved,
 }: {
   currentEmail: string | null;
+  suggestedEmail: string | null;
   onSaved: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [email, setEmail] = useState(currentEmail ?? "");
+  const [email, setEmail] = useState(currentEmail ?? suggestedEmail ?? "");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -244,5 +254,91 @@ function EmailPasswordForm({
         </BrandButton>
       </div>
     </form>
+  );
+}
+
+/** The customer's details, editable in place. */
+function ProfileCard({
+  slug,
+  workshopId,
+  customer,
+  carCount,
+}: {
+  slug: string;
+  workshopId: string;
+  customer: Customer;
+  carCount: number;
+}) {
+  const queryClient = useQueryClient();
+  const [editing, setEditing] = useState(false);
+
+  if (editing) {
+    return (
+      <div className="app-card p-5">
+        <h2 className="mb-4 text-base">Your details</h2>
+        <ProfileForm
+          initial={{
+            name: customer.name,
+            email: customer.email ?? "",
+            company: customer.company_name ?? "",
+          }}
+          submitLabel="Save"
+          onSubmit={async (values) => {
+            try {
+              await updateMyProfile({ workshopId, ...values });
+              await queryClient.invalidateQueries({ queryKey: ["customer", slug] });
+              toast.success("Details saved.");
+              setEditing(false);
+            } catch (error) {
+              toast.error(PROFILE_ERRORS[error instanceof ProfileError ? error.reason : "failed"]);
+            }
+          }}
+          footer={
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              className="mt-2 min-h-[44px] w-full text-sm text-muted-foreground"
+            >
+              Cancel
+            </button>
+          }
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="app-card p-4">
+      <div className="flex items-start gap-4">
+        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-border bg-brand-soft text-xl font-semibold text-brand-strong">
+          {customer.name[0]?.toUpperCase()}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-base font-semibold">{customer.name}</p>
+          {customer.company_name ? (
+            <p className="flex items-center gap-1 truncate text-sm text-muted-foreground">
+              <Building2 className="h-3.5 w-3.5 shrink-0" /> {customer.company_name}
+            </p>
+          ) : null}
+          <p className="text-sm text-muted-foreground">+65 {customer.mobile}</p>
+          {customer.email ? (
+            <p className="truncate text-sm text-muted-foreground">{customer.email}</p>
+          ) : null}
+          <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+            <Car className="h-3.5 w-3.5" /> {carCount === 1 ? "1 car" : `${carCount} cars`}
+          </p>
+        </div>
+        {customer.profileSupported ? (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            aria-label="Edit your details"
+            className="-mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+        ) : null}
+      </div>
+    </div>
   );
 }

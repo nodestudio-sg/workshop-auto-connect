@@ -22,7 +22,9 @@ import { Route as SlugIconDotsvgRouteImport } from './routes/$slug/icon[.]svg'
 import { Route as SlugManifestDotwebmanifestRouteImport } from './routes/$slug/manifest[.]webmanifest'
 import { Route as SlugRequestedRouteImport } from './routes/$slug/requested'
 import { Route as SlugResetPasswordRouteImport } from './routes/$slug/reset-password'
+import { Route as SlugSignUpRouteImport } from './routes/$slug/sign-up'
 import { Route as SlugTodayRouteImport } from './routes/$slug/today'
+import { Route as SlugWelcomeRouteImport } from './routes/$slug/welcome'
 import { Route as SlugInvoiceJobIdRouteImport } from './routes/$slug/invoice.$jobId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -91,9 +93,19 @@ const SlugResetPasswordRoute = SlugResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => SlugRouteRoute,
 } as any)
+const SlugSignUpRoute = SlugSignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => SlugRouteRoute,
+} as any)
 const SlugTodayRoute = SlugTodayRouteImport.update({
   id: '/today',
   path: '/today',
+  getParentRoute: () => SlugRouteRoute,
+} as any)
+const SlugWelcomeRoute = SlugWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
   getParentRoute: () => SlugRouteRoute,
 } as any)
 const SlugInvoiceJobIdRoute = SlugInvoiceJobIdRouteImport.update({
@@ -115,7 +127,9 @@ export interface FileRoutesByFullPath {
   '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
   '/$slug/requested': typeof SlugRequestedRoute
   '/$slug/reset-password': typeof SlugResetPasswordRoute
+  '/$slug/sign-up': typeof SlugSignUpRoute
   '/$slug/today': typeof SlugTodayRoute
+  '/$slug/welcome': typeof SlugWelcomeRoute
   '/$slug/': typeof SlugIndexRoute
   '/$slug/invoice/$jobId': typeof SlugInvoiceJobIdRoute
 }
@@ -131,7 +145,9 @@ export interface FileRoutesByTo {
   '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
   '/$slug/requested': typeof SlugRequestedRoute
   '/$slug/reset-password': typeof SlugResetPasswordRoute
+  '/$slug/sign-up': typeof SlugSignUpRoute
   '/$slug/today': typeof SlugTodayRoute
+  '/$slug/welcome': typeof SlugWelcomeRoute
   '/$slug': typeof SlugIndexRoute
   '/$slug/invoice/$jobId': typeof SlugInvoiceJobIdRoute
 }
@@ -149,7 +165,9 @@ export interface FileRoutesById {
   '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
   '/$slug/requested': typeof SlugRequestedRoute
   '/$slug/reset-password': typeof SlugResetPasswordRoute
+  '/$slug/sign-up': typeof SlugSignUpRoute
   '/$slug/today': typeof SlugTodayRoute
+  '/$slug/welcome': typeof SlugWelcomeRoute
   '/$slug/': typeof SlugIndexRoute
   '/$slug/invoice/$jobId': typeof SlugInvoiceJobIdRoute
 }
@@ -168,7 +186,9 @@ export interface FileRouteTypes {
     | '/$slug/manifest.webmanifest'
     | '/$slug/requested'
     | '/$slug/reset-password'
+    | '/$slug/sign-up'
     | '/$slug/today'
+    | '/$slug/welcome'
     | '/$slug/'
     | '/$slug/invoice/$jobId'
   fileRoutesByTo: FileRoutesByTo
@@ -184,7 +204,9 @@ export interface FileRouteTypes {
     | '/$slug/manifest.webmanifest'
     | '/$slug/requested'
     | '/$slug/reset-password'
+    | '/$slug/sign-up'
     | '/$slug/today'
+    | '/$slug/welcome'
     | '/$slug'
     | '/$slug/invoice/$jobId'
   id:
@@ -201,7 +223,9 @@ export interface FileRouteTypes {
     | '/$slug/manifest.webmanifest'
     | '/$slug/requested'
     | '/$slug/reset-password'
+    | '/$slug/sign-up'
     | '/$slug/today'
+    | '/$slug/welcome'
     | '/$slug/'
     | '/$slug/invoice/$jobId'
   fileRoutesById: FileRoutesById
@@ -304,11 +328,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugResetPasswordRouteImport
       parentRoute: typeof SlugRouteRoute
     }
+    '/$slug/sign-up': {
+      id: '/$slug/sign-up'
+      path: '/sign-up'
+      fullPath: '/$slug/sign-up'
+      preLoaderRoute: typeof SlugSignUpRouteImport
+      parentRoute: typeof SlugRouteRoute
+    }
     '/$slug/today': {
       id: '/$slug/today'
       path: '/today'
       fullPath: '/$slug/today'
       preLoaderRoute: typeof SlugTodayRouteImport
+      parentRoute: typeof SlugRouteRoute
+    }
+    '/$slug/welcome': {
+      id: '/$slug/welcome'
+      path: '/welcome'
+      fullPath: '/$slug/welcome'
+      preLoaderRoute: typeof SlugWelcomeRouteImport
       parentRoute: typeof SlugRouteRoute
     }
     '/$slug/invoice/$jobId': {
@@ -332,7 +370,9 @@ interface SlugRouteRouteChildren {
   SlugManifestDotwebmanifestRoute: typeof SlugManifestDotwebmanifestRoute
   SlugRequestedRoute: typeof SlugRequestedRoute
   SlugResetPasswordRoute: typeof SlugResetPasswordRoute
+  SlugSignUpRoute: typeof SlugSignUpRoute
   SlugTodayRoute: typeof SlugTodayRoute
+  SlugWelcomeRoute: typeof SlugWelcomeRoute
   SlugIndexRoute: typeof SlugIndexRoute
   SlugInvoiceJobIdRoute: typeof SlugInvoiceJobIdRoute
 }
@@ -348,7 +388,9 @@ const SlugRouteRouteChildren: SlugRouteRouteChildren = {
   SlugManifestDotwebmanifestRoute: SlugManifestDotwebmanifestRoute,
   SlugRequestedRoute: SlugRequestedRoute,
   SlugResetPasswordRoute: SlugResetPasswordRoute,
+  SlugSignUpRoute: SlugSignUpRoute,
   SlugTodayRoute: SlugTodayRoute,
+  SlugWelcomeRoute: SlugWelcomeRoute,
   SlugIndexRoute: SlugIndexRoute,
   SlugInvoiceJobIdRoute: SlugInvoiceJobIdRoute,
 }

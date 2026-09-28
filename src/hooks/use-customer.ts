@@ -2,7 +2,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchCustomer, fetchVehicles, type Customer, type Vehicle } from "@/lib/customer";
+import {
+  fetchCustomer,
+  fetchVehicles,
+  needsProfile,
+  type Customer,
+  type Vehicle,
+} from "@/lib/customer";
 
 export type CustomerBundle = {
   customer: Customer;
@@ -23,9 +29,10 @@ function readSelected(slug: string): string | null {
 
 /**
  * Loads the signed-in customer and their cars for this workshop.
- * Sends the visitor back to the sign-in screen when there is no session.
+ * Sends the visitor back to the sign-in screen when there is no session, and
+ * to the "Tell us about you" step while their profile is incomplete.
  */
-export function useCustomer(slug: string) {
+export function useCustomer(slug: string, { allowIncompleteProfile = false } = {}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -45,10 +52,13 @@ export function useCustomer(slug: string) {
   });
 
   useEffect(() => {
-    if (!query.isLoading && query.data === null) {
+    if (query.isLoading) return;
+    if (query.data === null) {
       navigate({ to: "/$slug", params: { slug } });
+    } else if (query.data && !allowIncompleteProfile && needsProfile(query.data.customer)) {
+      navigate({ to: "/$slug/welcome", params: { slug } });
     }
-  }, [query.isLoading, query.data, navigate, slug]);
+  }, [query.isLoading, query.data, navigate, slug, allowIncompleteProfile]);
 
   /** Switch the car shown across the app (remembered on this device). */
   const selectVehicle = useCallback(

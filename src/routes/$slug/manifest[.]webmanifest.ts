@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { fetchWorkshopBranding, pngSize } from "@/lib/workshop-public.server";
-import sgCarServicesIcon from "@/assets/sg-car-services-icon.png.asset.json";
 
 /**
  * Per-workshop web app manifest: installing /sgcarservices gives an icon named
@@ -17,7 +16,7 @@ export const Route = createFileRoute("/$slug/manifest.webmanifest")({
         // The workshop's own logo at its real size; the generated initials
         // icon (scalable) as a fallback, and the only icon when there's no logo.
         const icons: { src: string; sizes: string; type: string; purpose: string }[] = [];
-        const appIcon = data.slug === "sgcarservices" ? sgCarServicesIcon.url : data.logo_url;
+        const appIcon = data.icon_url ?? data.logo_url;
         if (appIcon) {
           const size = await pngSize(new URL(appIcon, request.url).toString());
           if (size && size.width === size.height && size.width >= 144) {

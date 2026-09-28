@@ -20,16 +20,13 @@ export async function fetchWorkshopBranding(slug: string) {
     },
   });
 
-  const { data } = await supabase
-    .from("workshops")
-    .select("slug, name, brand_color, logo_url")
-    .eq("slug", slug)
-    .maybeSingle();
+  const { data } = await supabase.from("workshops").select("*").eq("slug", slug).maybeSingle();
   return data as {
     slug: string;
     name: string;
     brand_color: string;
     logo_url: string | null;
+    icon_url?: string | null;
   } | null;
 }
 

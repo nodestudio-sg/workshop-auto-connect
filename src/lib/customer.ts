@@ -10,7 +10,55 @@ export type ExtraWork = {
   photos: string[];
 };
 
-export type Customer = { id: string; name: string; mobile: string; workshop_id: string };
+export type Customer = {
+  id: string;
+  name: string;
+  mobile: string;
+  workshop_id: string;
+  email: string | null;
+  company_name: string | null;
+  /** False until migration 0005 adds email and company to customers. */
+  profileSupported: boolean;
+};
+
+/**
+ * A customer still needs to tell us about themselves: no email yet, or the
+ * placeholder name given when their number first signed in.
+ */
+export function needsProfile(customer: Customer): boolean {
+  if (!customer.profileSupported) return false;
+  return !customer.email || customer.name === `Customer ${customer.mobile}`;
+}
+
+export class ProfileError extends Error {
+  constructor(readonly reason: "name" | "email" | "company" | "unavailable" | "failed") {
+    super(reason);
+  }
+}
+
+/** Saves the signed-in customer's own name, email and company. */
+export async function updateMyProfile(input: {
+  workshopId: string;
+  name: string;
+  email: string;
+  company: string;
+}): Promise<void> {
+  const { error } = await (supabase.rpc(
+    "update_my_profile" as never,
+    {
+      _workshop_id: input.workshopId,
+      _name: input.name,
+      _email: input.email,
+      _company: input.company,
+    } as never,
+  ) as unknown as Promise<{ error: { code?: string; message: string } | null }>);
+  if (!error) return;
+  if (error.code === "PGRST202") throw new ProfileError("unavailable");
+  if (error.message.includes("INVALID_NAME")) throw new ProfileError("name");
+  if (error.message.includes("INVALID_EMAIL")) throw new ProfileError("email");
+  if (error.message.includes("INVALID_COMPANY")) throw new ProfileError("company");
+  throw new ProfileError("failed");
+}
 
 export type Vehicle = {
   id: string;
@@ -56,12 +104,22 @@ export type Slot = { slot_date: string; slot_time: string; available: boolean };
 export async function fetchCustomer(slug: string): Promise<Customer | null> {
   const { data } = await supabase
     .from("customers")
-    .select("id, name, mobile, workshop_id, workshops!inner(slug)")
+    // "*" so email and company (migration 0005) are read when present
+    // without making the query fail before it has run.
+    .select("*, workshops!inner(slug)")
     .eq("workshops.slug", slug)
     .maybeSingle();
   if (!data) return null;
-  const { id, name, mobile, workshop_id } = data as unknown as Customer;
-  return { id, name, mobile, workshop_id };
+  const row = data as Record<string, unknown>;
+  return {
+    id: String(row["id"]),
+    name: String(row["name"]),
+    mobile: String(row["mobile"]),
+    workshop_id: String(row["workshop_id"]),
+    email: typeof row["email"] === "string" ? row["email"] : null,
+    company_name: typeof row["company_name"] === "string" ? row["company_name"] : null,
+    profileSupported: "email" in row,
+  };
 }
 
 export async function fetchVehicle(customerId: string): Promise<Vehicle | null> {

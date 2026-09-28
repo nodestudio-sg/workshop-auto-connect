@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff, Mail, MapPin, Phone, Smartphone } from "lucide-react";
@@ -84,41 +84,55 @@ function SignInScreen() {
       <main className="mx-auto w-full max-w-[380px] flex-1 pb-10 pt-8">
         <div className="app-card overflow-hidden">
           <div className="p-6">
-          <h2 className="mb-5 text-lg">Sign in</h2>
-          {demo ? (
-            <div className="mb-4">
-              <Pill>Demo sign-in</Pill>
+            <h2 className="mb-5 text-lg">Sign in</h2>
+            {demo ? (
+              <div className="mb-4">
+                <Pill>Demo sign-in</Pill>
+              </div>
+            ) : null}
+
+            <div
+              role="tablist"
+              aria-label="Sign-in method"
+              className="grid grid-cols-2 border-b border-border"
+            >
+              <MethodTab
+                active={method === "mobile"}
+                onClick={() => setMethod("mobile")}
+                icon={Smartphone}
+                label="Mobile"
+              />
+              <MethodTab
+                active={method === "email"}
+                onClick={() => setMethod("email")}
+                icon={Mail}
+                label="Email"
+              />
             </div>
-          ) : null}
 
-          <div
-            role="tablist"
-            aria-label="Sign-in method"
-            className="grid grid-cols-2 border-b border-border"
-          >
-            <MethodTab
-              active={method === "mobile"}
-              onClick={() => setMethod("mobile")}
-              icon={Smartphone}
-              label="Mobile"
-            />
-            <MethodTab
-              active={method === "email"}
-              onClick={() => setMethod("email")}
-              icon={Mail}
-              label="Email"
-            />
-          </div>
-
-          <div className="mt-6">
-            {method === "mobile" ? (
-              <MobileSignIn slug={slug} demo={demo} demoPending={demoPending} onDone={goHome} />
-            ) : (
-              <EmailSignIn slug={slug} workshopName={workshop.name} onDone={goHome} />
-            )}
-          </div>
+            <div className="mt-6">
+              {method === "mobile" ? (
+                <MobileSignIn slug={slug} demo={demo} demoPending={demoPending} onDone={goHome} />
+              ) : (
+                <EmailSignIn slug={slug} workshopName={workshop.name} onDone={goHome} />
+              )}
+            </div>
           </div>
         </div>
+
+        <Link
+          to="/$slug/sign-up"
+          params={{ slug }}
+          className="app-card mt-4 flex min-h-[64px] items-center justify-between gap-3 px-6 py-4"
+        >
+          <span>
+            <span className="block text-sm font-semibold">New to {workshop.name}?</span>
+            <span className="block text-xs text-muted-foreground">
+              Create an account in a minute. Company fleets welcome.
+            </span>
+          </span>
+          <span className="shrink-0 text-sm font-semibold text-brand-strong">Sign up</span>
+        </Link>
 
         <div className="mt-6">
           <InstallHint slug={slug} workshopName={workshop.name} />
@@ -131,7 +145,7 @@ function SignInScreen() {
           </p>
           <a
             href={phoneLinks(workshop.phone).tel}
-             className="inline-flex min-h-[44px] items-center gap-1.5 font-medium text-brand-strong"
+            className="inline-flex min-h-[44px] items-center gap-1.5 font-medium text-brand-strong"
           >
             <Phone className="h-3.5 w-3.5" />
             {workshop.phone}
@@ -221,7 +235,10 @@ function MobileSignIn({
           if (mobileValid && !busy && !demoPending) void sendCode();
         }}
       >
-        <label htmlFor="mobile" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <label
+          htmlFor="mobile"
+          className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+        >
           Mobile number
         </label>
         <div className="mt-2 flex items-center gap-2 rounded-md border border-input bg-card px-4 focus-within:border-brand-strong">

@@ -49,7 +49,7 @@ const MESSAGES: Record<VehicleError["reason"], string> = {
     "That car is already registered with the workshop under another customer. Please call them to have it moved to you.",
   "invalid-plate": "That doesn't look like a Singapore plate, e.g. SKA 1234 B.",
   invalid: "Please check the make, model and year.",
-  "too-many": "You can have up to 5 cars. Call the workshop if you need more.",
+  "too-many": "You can have up to 50 cars. Call the workshop if you need more.",
   unavailable: "Adding a car isn't switched on yet. Please ask the workshop to add it for you.",
   failed: "We couldn't add your car just now. Please try again.",
 };

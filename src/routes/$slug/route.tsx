@@ -1,6 +1,5 @@
 import { createFileRoute, Outlet, notFound, Link } from "@tanstack/react-router";
 import { getWorkshopBySlug } from "@/lib/workshop.functions";
-import sgCarServicesIcon from "@/assets/sg-car-services-icon.png.asset.json";
 
 export const Route = createFileRoute("/$slug")({
   loader: async ({ params }) => {
@@ -13,7 +12,8 @@ export const Route = createFileRoute("/$slug")({
     if (!workshop) {
       return { meta: [{ title: "Workshop not found" }, { name: "robots", content: "noindex" }] };
     }
-    const appIcon = workshop.slug === "sgcarservices" ? sgCarServicesIcon.url : workshop.logo_url;
+    // The square icon from the workshop record, else its logo.
+    const appIcon = workshop.icon_url ?? workshop.logo_url;
     return {
       meta: [
         { title: workshop.name },
