@@ -23,7 +23,6 @@ import { dayLabel, km, money, shortDate } from "@/lib/format";
 import { STAGES, stageIndex, statusLabel } from "@/lib/job-status";
 import { Loading, Pill, useWorkshop } from "@/components/app/workshop-ui";
 import {
-  CarIllustration,
   directionsUrl,
   NumberPlate,
   phoneLinks,
@@ -96,26 +95,26 @@ function Home() {
 
   return (
     <>
-      <div className="brand-hero pb-20">
-        <header className="mx-auto flex w-full max-w-[420px] items-center gap-3 px-5 pb-2 pt-6">
-          <WorkshopLogo workshop={workshop} size={44} className="ring-2 ring-white/30" />
+      <div className="brand-hero">
+        <header className="mx-auto flex min-h-[104px] w-full max-w-[420px] items-center gap-3 px-5 py-5">
+          <WorkshopLogo workshop={workshop} size={40} />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-medium opacity-80">{workshop.name}</p>
-            <p className="truncate text-xl font-bold">
+            <p className="truncate text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{workshop.name}</p>
+            <h1 className="mt-1 truncate text-xl">
               {greeting()}, {firstName}
-            </p>
+            </h1>
           </div>
           <Link
             to="/$slug/account"
             params={{ slug }}
             aria-label="Account"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 text-base font-bold"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-card text-sm font-semibold"
           >
             {firstName?.[0]?.toUpperCase() ?? "?"}
           </Link>
         </header>
         {data.vehicles.length > 0 ? (
-          <div className="mx-auto w-full max-w-[420px] px-5 pt-3">
+          <div className="mx-auto w-full max-w-[420px] px-5 pb-5">
             <VehicleSwitcher
               slug={slug}
               vehicles={data.vehicles}
@@ -127,7 +126,7 @@ function Home() {
         ) : null}
       </div>
 
-      <main className="mx-auto -mt-16 w-full max-w-[420px] space-y-4 px-4 pb-28">
+      <main className="mx-auto w-full max-w-[420px] space-y-5 px-5 pb-28 pt-5">
         {vehicle ? (
           <Link
             to="/$slug/car"
@@ -145,8 +144,7 @@ function Home() {
               </div>
               <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />
             </div>
-            <CarIllustration className="mx-auto mt-2 h-20 w-auto" />
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="mt-5 grid grid-cols-2 gap-2 border-t border-border pt-4">
               <Stat icon={Gauge} label="Mileage" value={km(vehicle.mileage_km)} />
               <Stat
                 icon={Wrench}
@@ -161,12 +159,11 @@ function Home() {
             params={{ slug }}
             className="app-card flex flex-col items-center p-6 text-center"
           >
-            <CarIllustration className="h-16 w-auto opacity-90" />
-            <p className="mt-3 text-base font-semibold">Add your car</p>
+            <p className="text-base font-semibold">Add your car</p>
             <p className="mt-1 text-sm text-muted-foreground">
               Add your plate to book services and keep its history in one place.
             </p>
-            <span className="mt-4 inline-flex min-h-[44px] items-center rounded-full bg-brand px-5 text-sm font-semibold text-brand-foreground">
+            <span className="mt-4 inline-flex min-h-[44px] items-center rounded-md bg-brand-strong px-5 text-sm font-semibold text-brand-foreground">
               Add a car
             </span>
           </Link>
@@ -176,8 +173,8 @@ function Home() {
 
         {vehicle ? <NextService vehicle={vehicle} history={history} today={today} /> : null}
 
-        <section aria-label="Quick actions" className="app-card p-3">
-          <div className="grid grid-cols-4 gap-1">
+        <section aria-label="Quick actions" className="border-y border-border py-3">
+          <div className="grid grid-cols-4 gap-y-2">
             <Action to="book" slug={slug} icon={CalendarPlus} label="Book service" primary />
             <Action to="today" slug={slug} icon={Wrench} label="Track repair" />
             <Action to="car" slug={slug} icon={History} label="History" />
@@ -267,8 +264,8 @@ function Home() {
 
 function Stat({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
-      <Icon className="h-4 w-4 shrink-0 text-brand" />
+    <div className="flex items-center gap-2 border-l-2 border-brand-strong bg-muted/60 px-3 py-2">
+      <Icon className="h-4 w-4 shrink-0 text-brand-strong" />
       <div className="min-w-0">
         <p className="text-[11px] text-muted-foreground">{label}</p>
         <p className="truncate text-sm font-semibold">{value}</p>
@@ -292,7 +289,7 @@ function IconBubble({
   return (
     <span
       className={cn(
-        "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+        "flex h-10 w-10 shrink-0 items-center justify-center rounded-md",
         tones[tone],
       )}
     >
@@ -484,8 +481,10 @@ function Action(props: ActionProps) {
     <>
       <span
         className={cn(
-          "flex h-12 w-12 items-center justify-center rounded-2xl",
-          primary ? "bg-brand text-brand-foreground shadow-sm" : "bg-brand-soft text-brand",
+          "flex h-11 w-11 items-center justify-center rounded-md border",
+          primary
+            ? "border-brand-strong bg-brand-strong text-brand-foreground"
+            : "border-border bg-card text-brand-strong",
         )}
       >
         <Icon className="h-5 w-5" />
@@ -494,7 +493,7 @@ function Action(props: ActionProps) {
     </>
   );
   const className =
-    "flex min-h-[84px] flex-col items-center justify-start gap-1.5 rounded-xl px-1 py-2 active:bg-muted";
+    "flex min-h-[80px] flex-col items-center justify-start gap-2 rounded-md px-1 py-2 active:bg-muted";
 
   if (props.href) {
     return (

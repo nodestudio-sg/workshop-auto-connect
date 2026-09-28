@@ -25,7 +25,7 @@ export function WorkshopLogo({
         width={size}
         height={size}
         style={{ width: size, height: size }}
-        className={cn("shrink-0 rounded-[22%] bg-white object-cover", className)}
+        className={cn("shrink-0 rounded-sm border border-border bg-card object-cover", className)}
       />
     );
   }
@@ -40,7 +40,7 @@ export function WorkshopLogo({
       aria-label={`${workshop.name} logo`}
       style={{ width: size, height: size, fontSize: size * 0.38 }}
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-[22%] bg-brand font-bold text-brand-foreground",
+        "flex shrink-0 items-center justify-center rounded-sm bg-brand-strong font-semibold text-brand-foreground",
         className,
       )}
     >
@@ -56,7 +56,7 @@ export function NumberPlate({ plate, className }: { plate: string; className?: s
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md border-2 border-neutral-700 bg-neutral-900 px-3 py-1 font-mono text-lg font-bold tracking-[0.12em] text-white shadow-sm",
+        "inline-flex items-center rounded-sm border border-foreground/30 bg-card px-3 py-1 font-mono text-lg font-semibold tracking-[0.12em] text-foreground",
         className,
       )}
     >
@@ -94,8 +94,8 @@ export function CarIllustration({ className }: { className?: string }) {
 
 export function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex items-center justify-between px-1 pt-2">
-      <h2 className="text-[15px] font-semibold">{children}</h2>
+    <div className="flex items-end justify-between border-b border-border px-0 pb-2 pt-3">
+      <h2 className="text-base">{children}</h2>
       {action}
     </div>
   );
@@ -135,13 +135,13 @@ export function VehicleSwitcher({
             aria-checked={active}
             onClick={() => onSelect(vehicle.id)}
             className={cn(
-              "min-h-[40px] shrink-0 rounded-full border px-4 font-mono text-sm font-bold tracking-wider",
+               "min-h-[40px] shrink-0 rounded-md border px-4 font-mono text-sm font-semibold tracking-wider",
               onBrand
                 ? active
-                  ? "border-white bg-white text-neutral-900"
-                  : "border-white/40 text-white"
+                   ? "border-foreground bg-foreground text-card"
+                   : "border-border bg-card text-foreground"
                 : active
-                  ? "border-brand bg-brand text-brand-foreground"
+                   ? "border-brand-strong bg-brand-strong text-brand-foreground"
                   : "border-border bg-card",
             )}
           >
@@ -153,8 +153,8 @@ export function VehicleSwitcher({
         to="/$slug/add-car"
         params={{ slug }}
         className={cn(
-          "flex min-h-[40px] shrink-0 items-center gap-1 rounded-full border border-dashed px-4 text-sm font-semibold",
-          onBrand ? "border-white/60 text-white" : "border-brand/50 text-brand",
+           "flex min-h-[40px] shrink-0 items-center gap-1 rounded-md border border-dashed px-4 text-sm font-semibold",
+           onBrand ? "border-border bg-card text-foreground" : "border-brand/50 text-brand-strong",
         )}
       >
         <Plus className="h-4 w-4" /> Add car
@@ -190,13 +190,13 @@ export function TabBar({ slug, active }: { slug: string; active: Tab }) {
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "flex min-h-[60px] flex-col items-center justify-center gap-1 text-[11px] font-medium",
-                  isActive ? "text-brand" : "text-muted-foreground",
+                  isActive ? "text-brand-strong" : "text-muted-foreground",
                 )}
               >
                 <span
                   className={cn(
-                    "flex h-7 w-12 items-center justify-center rounded-full transition-colors",
-                    isActive && "bg-brand-soft",
+                    "flex h-7 w-12 items-center justify-center rounded-sm transition-colors",
+                    isActive && "border-b-2 border-brand-strong",
                   )}
                 >
                   <Icon className="h-5 w-5" strokeWidth={isActive ? 2.4 : 2} />
@@ -214,8 +214,8 @@ export function TabBar({ slug, active }: { slug: string; active: Tab }) {
 /** Plain title header for the tab screens. */
 export function ScreenHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <header className="mx-auto w-full max-w-[420px] px-5 pb-1 pt-6">
-      <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+    <header className="mx-auto w-full max-w-[420px] border-b border-border px-5 pb-4 pt-8">
+      <h1 className="text-2xl">{title}</h1>
       {subtitle ? <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p> : null}
     </header>
   );

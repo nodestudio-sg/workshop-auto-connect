@@ -119,7 +119,7 @@ function Today() {
                   <div className="flex flex-col items-center">
                     <span
                       className={cn(
-                        "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-bold",
+                         "flex h-7 w-7 shrink-0 items-center justify-center rounded-sm border text-xs font-bold",
                         done && "border-brand bg-brand text-brand-foreground",
                         active && "border-attention bg-attention text-attention-foreground",
                         !done && !active && "border-border bg-card text-muted-foreground",

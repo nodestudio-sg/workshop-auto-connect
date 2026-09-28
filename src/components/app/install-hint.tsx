@@ -43,7 +43,7 @@ export function InstallHint({ slug, workshopName }: { slug: string; workshopName
   }
 
   return (
-    <div className="app-card relative bg-brand-soft p-4">
+    <div className="relative border-y border-border bg-secondary/55 px-4 py-4">
       <button
         type="button"
         aria-label="Dismiss"
@@ -52,7 +52,7 @@ export function InstallHint({ slug, workshopName }: { slug: string; workshopName
       >
         <X className="h-4 w-4" />
       </button>
-      <p className="pr-8 text-sm font-semibold">Add {workshopName} to your home screen</p>
+      <p className="pr-8 text-xs font-semibold uppercase tracking-wider">Install {workshopName}</p>
       {platform === "ios" ? (
         <p className="mt-2 flex flex-wrap items-center gap-1 text-xs leading-relaxed text-muted-foreground">
           In Safari, tap <Share className="inline h-3.5 w-3.5" /> Share, then

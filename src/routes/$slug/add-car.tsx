@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useCustomer } from "@/hooks/use-customer";
 import { addVehicle, VehicleError } from "@/lib/customer";
 import { BrandButton, Loading, TopBar, useWorkshop } from "@/components/app/workshop-ui";
-import { CarIllustration, NumberPlate } from "@/components/app/app-shell";
+import { NumberPlate } from "@/components/app/app-shell";
 
 export const Route = createFileRoute("/$slug/add-car")({
   head: () => ({
@@ -106,12 +106,14 @@ function AddCar() {
           </p>
         </div>
 
-        <div className="app-card flex flex-col items-center gap-3 p-5">
+        <div className="flex flex-col items-center border-y border-border py-6">
           <NumberPlate
             plate={cleanPlate || "SKA1234B"}
             className={cleanPlate ? "" : "opacity-30"}
           />
-          <CarIllustration className="h-16 w-auto" />
+          <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Singapore vehicle registration
+          </p>
         </div>
 
         <form

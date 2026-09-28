@@ -16,7 +16,6 @@ import {
   useWorkshop,
 } from "@/components/app/workshop-ui";
 import {
-  CarIllustration,
   NumberPlate,
   ScreenHeader,
   SectionTitle,
@@ -81,8 +80,7 @@ function MyCar() {
               </div>
               <Pill tone="brand">{km(vehicle.mileage_km)}</Pill>
             </div>
-            <CarIllustration className="mx-auto mt-3 h-20 w-auto" />
-            <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4 text-sm">
+            <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-border pt-4 text-sm">
               <div>
                 <dt className="text-xs text-muted-foreground">Engine oil</dt>
                 <dd className="font-medium">
