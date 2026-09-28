@@ -12,6 +12,7 @@ export function bookingStatus(value: unknown): BookingStatus {
 
 export type BookingSummary = {
   id: string;
+  vehicleId: string;
   status: BookingStatus;
   preferredDate: string;
   preferredTime: string;
@@ -35,6 +36,7 @@ export async function fetchBookings(workshopId: string): Promise<BookingSummary[
       : [];
     return {
       id: String(row["id"]),
+      vehicleId: String(row["vehicle_id"]),
       status: bookingStatus(row["status"]),
       preferredDate: String(row["preferred_date"]),
       preferredTime: String(row["preferred_time"]),
@@ -58,6 +60,21 @@ export class PricesChangedError extends Error {
   constructor() {
     super("PRICES_CHANGED");
   }
+}
+
+export class SlotUnavailableError extends Error {
+  constructor() {
+    super("SLOT_UNAVAILABLE");
+  }
+}
+
+/** Cancels the customer's own upcoming request or confirmed booking. */
+export async function cancelBookingRequest(bookingId: string): Promise<void> {
+  const { error } = await (supabase.rpc(
+    "cancel_booking_request" as never,
+    { _booking_id: bookingId } as never,
+  ) as unknown as Promise<{ error: { code?: string; message: string } | null }>);
+  if (error) throw error;
 }
 
 type SubmitInput = {
@@ -110,6 +127,7 @@ export async function submitBookingRequest(input: SubmitInput): Promise<string> 
 
   if (!error && typeof data === "string") return data;
   if (error?.message.includes("PRICES_CHANGED")) throw new PricesChangedError();
+  if (error?.message.includes("SLOT_UNAVAILABLE")) throw new SlotUnavailableError();
   // PGRST202: the function doesn't exist yet because migration 0002 hasn't
   // run. Fall back to the original direct insert.
   if (error?.code !== "PGRST202") throw error ?? new Error("No booking id returned");
@@ -135,6 +153,7 @@ export async function submitBookingRequest(input: SubmitInput): Promise<string> 
     .select("id")
     .single();
   if (insertError?.message.includes("PRICES_CHANGED")) throw new PricesChangedError();
+  if (insertError?.message.includes("SLOT_UNAVAILABLE")) throw new SlotUnavailableError();
   if (insertError || !inserted) throw insertError ?? new Error("No booking id returned");
   return inserted.id;
 }

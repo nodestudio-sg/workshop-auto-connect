@@ -1,34 +1,39 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createClient } from "@supabase/supabase-js";
+import { fetchWorkshopBranding, pngSize } from "@/lib/workshop-public.server";
 
+/**
+ * Per-workshop web app manifest: installing /sgcarservices gives an icon named
+ * "SG Car Services" that opens /sgcarservices/. scope and start_url are both
+ * /:slug/ — don't change them, installed home-screen apps depend on them.
+ */
 export const Route = createFileRoute("/$slug/manifest.webmanifest")({
   server: {
     handlers: {
-      GET: async ({ params }) => {
-        const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
-        const supabase = createClient(process.env["SUPABASE_URL"]!, key, {
-          auth: { persistSession: false, autoRefreshToken: false },
-          global: {
-            fetch: (input: RequestInfo | URL, init?: RequestInit) => {
-              const headers = new Headers(init?.headers);
-              if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`) {
-                headers.delete("Authorization");
-              }
-              headers.set("apikey", key);
-              return fetch(input, { ...init, headers });
-            },
-          },
-        });
-
-        const { data } = await supabase
-          .from("workshops")
-          .select("slug, name, brand_color, logo_url")
-          .eq("slug", params.slug)
-          .maybeSingle();
-
+      GET: async ({ params, request }) => {
+        const data = await fetchWorkshopBranding(params.slug);
         if (!data) return new Response("Not found", { status: 404 });
 
-        const icon = data.logo_url ?? "/brand/sgcarservices.png";
+        // The workshop's own logo at its real size; the generated initials
+        // icon (scalable) as a fallback, and the only icon when there's no logo.
+        const icons: { src: string; sizes: string; type: string; purpose: string }[] = [];
+        if (data.logo_url) {
+          const size = await pngSize(new URL(data.logo_url, request.url).toString());
+          if (size && size.width === size.height && size.width >= 144) {
+            icons.push({
+              src: data.logo_url,
+              sizes: `${size.width}x${size.height}`,
+              type: "image/png",
+              purpose: "any",
+            });
+          }
+        }
+        icons.push({
+          src: `/${data.slug}/icon.svg`,
+          sizes: "any",
+          type: "image/svg+xml",
+          purpose: "any",
+        });
+
         const manifest = {
           id: `/${data.slug}/`,
           name: data.name,
@@ -39,12 +44,8 @@ export const Route = createFileRoute("/$slug/manifest.webmanifest")({
           display: "standalone",
           orientation: "portrait",
           theme_color: data.brand_color,
-          background_color: "#f5f7fa",
-          icons: [
-            { src: icon, sizes: "192x192", type: "image/png", purpose: "any" },
-            { src: icon, sizes: "512x512", type: "image/png", purpose: "any" },
-            { src: icon, sizes: "512x512", type: "image/png", purpose: "maskable" },
-          ],
+          background_color: "#f4f1ea",
+          icons,
         };
 
         return new Response(JSON.stringify(manifest, null, 2), {

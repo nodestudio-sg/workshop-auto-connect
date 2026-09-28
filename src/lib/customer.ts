@@ -171,7 +171,18 @@ export async function fetchServices(workshopId: string): Promise<Service[]> {
   }));
 }
 
+/**
+ * Bookable times. From migration 0004 these come from the workshop's opening
+ * days, slot times and capacity, so they never run out; before it, from the
+ * workshop_slots rows.
+ */
 export async function fetchSlots(workshopId: string): Promise<Slot[]> {
+  const generated = await (supabase.rpc(
+    "available_slots" as never,
+    { _workshop_id: workshopId } as never,
+  ) as unknown as Promise<{ data: Slot[] | null; error: { code?: string } | null }>);
+  if (!generated.error) return generated.data ?? [];
+
   const { data } = await supabase
     .from("workshop_slots")
     .select("slot_date, slot_time, available")

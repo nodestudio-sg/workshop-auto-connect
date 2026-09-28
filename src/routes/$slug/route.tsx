@@ -31,8 +31,14 @@ export const Route = createFileRoute("/$slug")({
       ],
       links: [
         { rel: "manifest", href: `/${params.slug}/manifest.webmanifest` },
-        { rel: "apple-touch-icon", href: workshop.logo_url ?? "/favicon.ico" },
-        { rel: "icon", type: "image/png", href: workshop.logo_url ?? "/favicon.ico" },
+        // iOS needs a PNG for the home-screen icon; without a logo it uses a
+        // snapshot of the page, which is better than another workshop's logo.
+        ...(workshop.logo_url
+          ? [
+              { rel: "apple-touch-icon", href: workshop.logo_url },
+              { rel: "icon", type: "image/png", href: workshop.logo_url },
+            ]
+          : [{ rel: "icon", type: "image/svg+xml", href: `/${params.slug}/icon.svg` }]),
       ],
     };
   },

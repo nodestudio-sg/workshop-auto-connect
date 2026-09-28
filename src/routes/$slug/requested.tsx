@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
 import {
   CalendarPlus,
   Check,
@@ -12,7 +14,18 @@ import {
   XCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { bookingStatus, type BookingStatus } from "@/lib/booking";
+import { bookingStatus, cancelBookingRequest, type BookingStatus } from "@/lib/booking";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { money, shortDate } from "@/lib/format";
 import {
   Card,
@@ -184,6 +197,17 @@ function RequestSent() {
         >
           See all bookings
         </Link>
+
+        {data &&
+        (status === "requested" || status === "confirmed") &&
+        String((confirmedDate ?? data.preferred_date) as string) >= todayInSingapore() ? (
+          <CancelBooking
+            bookingId={id}
+            workshopId={workshop.id}
+            workshopName={workshop.name}
+            confirmed={status === "confirmed"}
+          />
+        ) : null}
       </Page>
     </>
   );
@@ -324,7 +348,7 @@ function NextSteps({
             <div className="flex flex-col items-center">
               <span
                 className={cn(
-                   "flex h-6 w-6 shrink-0 items-center justify-center rounded-sm border text-xs font-bold",
+                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-sm border text-xs font-bold",
                   step.done && "border-success bg-success text-white",
                   step.current && "border-attention bg-attention-soft text-attention",
                   !step.done && !step.current && "border-border text-muted-foreground",
@@ -388,4 +412,78 @@ function calendarFile({
     "END:VCALENDAR",
   ].join("\r\n");
   return `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
+}
+
+function todayInSingapore(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore" }).format(new Date());
+}
+
+function CancelBooking({
+  bookingId,
+  workshopId,
+  workshopName,
+  confirmed,
+}: {
+  bookingId: string;
+  workshopId: string;
+  workshopName: string;
+  confirmed: boolean;
+}) {
+  const queryClient = useQueryClient();
+  const [busy, setBusy] = useState(false);
+
+  async function cancel() {
+    setBusy(true);
+    try {
+      await cancelBookingRequest(bookingId);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["booking", workshopId, bookingId] }),
+        queryClient.invalidateQueries({ queryKey: ["bookings", workshopId] }),
+        queryClient.invalidateQueries({ queryKey: ["slots", workshopId] }),
+      ]);
+      toast.success(confirmed ? "Booking cancelled." : "Request cancelled.");
+    } catch (error) {
+      const code = (error as { code?: string }).code;
+      toast.error(
+        code === "PGRST202"
+          ? `Cancelling online isn't switched on yet. Please call ${workshopName}.`
+          : `We couldn't cancel this just now. Please try again, or call ${workshopName}.`,
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <button
+          type="button"
+          disabled={busy}
+          className="flex min-h-[52px] w-full items-center justify-center text-sm font-semibold text-destructive disabled:opacity-40"
+        >
+          {busy ? "Cancelling…" : confirmed ? "Cancel booking" : "Cancel request"}
+        </button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {confirmed ? "Cancel this booking?" : "Cancel this request?"}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {workshopName} will see that you cancelled. You can book a new time any time.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Keep it</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => void cancel()}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {confirmed ? "Cancel booking" : "Cancel request"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 }

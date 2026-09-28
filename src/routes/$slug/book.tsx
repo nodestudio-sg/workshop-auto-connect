@@ -1,10 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Check, ChevronDown, MessageSquareText } from "lucide-react";
 import { toast } from "sonner";
 import { useCustomer } from "@/hooks/use-customer";
-import { PricesChangedError, submitBookingRequest } from "@/lib/booking";
+import {
+  fetchBookings,
+  isUpcoming,
+  PricesChangedError,
+  SlotUnavailableError,
+  submitBookingRequest,
+} from "@/lib/booking";
 import { fetchServices, fetchSlots, type Service } from "@/lib/customer";
 import { dayLabel, money } from "@/lib/format";
 import {
@@ -42,6 +48,7 @@ function BookService() {
   const { slug } = Route.useParams();
   const workshop = useWorkshop();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data, isLoading, selectVehicle } = useCustomer(slug);
 
   const [selected, setSelected] = useState<string[]>([]);
@@ -57,6 +64,11 @@ function BookService() {
   const slotsQuery = useQuery({
     queryKey: ["slots", workshop.id],
     queryFn: () => fetchSlots(workshop.id),
+  });
+  const bookingsQuery = useQuery({
+    queryKey: ["bookings", workshop.id],
+    queryFn: () => fetchBookings(workshop.id),
+    enabled: Boolean(data),
   });
 
   const services = useMemo(() => servicesQuery.data ?? [], [servicesQuery.data]);
@@ -85,6 +97,10 @@ function BookService() {
   }, [slotsQuery.data]);
 
   const times = dates.find(([value]) => value === date)?.[1] ?? [];
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore" }).format(new Date());
+  const existing = (bookingsQuery.data ?? []).find(
+    (booking) => booking.vehicleId === vehicle?.id && isUpcoming(booking, today),
+  );
 
   if (isLoading || !data) return <Loading />;
 
@@ -103,10 +119,18 @@ function BookService() {
         idempotencyKey: idempotencyKey.current,
         notes: notes.trim(),
       });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["bookings", workshop.id] }),
+        queryClient.invalidateQueries({ queryKey: ["slots", workshop.id] }),
+      ]);
       navigate({ to: "/$slug/requested", params: { slug }, search: { id } });
     } catch (error) {
       setBusy(false);
-      if (error instanceof PricesChangedError) {
+      if (error instanceof SlotUnavailableError) {
+        setTime(null);
+        await slotsQuery.refetch();
+        toast.error("That time was just taken. Please pick another time.");
+      } else if (error instanceof PricesChangedError) {
         await servicesQuery.refetch();
         toast.error(
           "Prices have changed since you opened this page. Please check them and send again.",
@@ -138,6 +162,26 @@ function BookService() {
             Pick what you need and a time that suits you. {workshop.name} confirms it with you.
           </p>
         </div>
+
+        {existing ? (
+          <Link
+            to="/$slug/requested"
+            params={{ slug }}
+            search={{ id: existing.id }}
+            className="app-card block border-attention bg-attention-soft p-4 text-sm"
+          >
+            <span className="font-semibold">
+              This car already has a{" "}
+              {existing.status === "confirmed" ? "confirmed booking" : "request"} for{" "}
+              {dayLabel(existing.confirmedDate ?? existing.preferredDate).weekday}{" "}
+              {dayLabel(existing.confirmedDate ?? existing.preferredDate).day}{" "}
+              {dayLabel(existing.confirmedDate ?? existing.preferredDate).month}.
+            </span>{" "}
+            <span className="text-muted-foreground">
+              Tap to view it, or carry on to book something else.
+            </span>
+          </Link>
+        ) : null}
 
         <Step number={1} title="Your car" done={Boolean(vehicle)}>
           {vehicle ? (
@@ -206,7 +250,7 @@ function BookService() {
                     setTime(null);
                   }}
                   className={cn(
-                     "flex min-h-[76px] w-16 shrink-0 flex-col items-center justify-center rounded-md border text-sm transition-colors",
+                    "flex min-h-[76px] w-16 shrink-0 flex-col items-center justify-center rounded-md border text-sm transition-colors",
                     date === value
                       ? "border-brand bg-brand text-brand-foreground shadow-sm"
                       : "border-border bg-card",
@@ -239,7 +283,7 @@ function BookService() {
                     aria-pressed={time === slot.time}
                     onClick={() => setTime(slot.time)}
                     className={cn(
-                       "min-h-[52px] rounded-md border text-sm font-semibold transition-colors",
+                      "min-h-[52px] rounded-md border text-sm font-semibold transition-colors",
                       time === slot.time
                         ? "border-brand bg-brand text-brand-foreground shadow-sm"
                         : "border-border bg-card",
@@ -334,10 +378,10 @@ function Step({
       <div className="mb-3 flex items-center gap-2">
         <span
           className={cn(
-             "flex h-6 w-6 shrink-0 items-center justify-center rounded-sm border text-xs font-bold",
-             done
-               ? "border-brand-strong bg-brand-strong text-brand-foreground"
-               : "border-border bg-card text-muted-foreground",
+            "flex h-6 w-6 shrink-0 items-center justify-center rounded-sm border text-xs font-bold",
+            done
+              ? "border-brand-strong bg-brand-strong text-brand-foreground"
+              : "border-border bg-card text-muted-foreground",
           )}
         >
           {done ? <Check className="h-3.5 w-3.5" /> : number}

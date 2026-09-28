@@ -18,6 +18,7 @@ import { Route as SlugBookRouteImport } from './routes/$slug/book'
 import { Route as SlugBookingsRouteImport } from './routes/$slug/bookings'
 import { Route as SlugCarRouteImport } from './routes/$slug/car'
 import { Route as SlugHomeRouteImport } from './routes/$slug/home'
+import { Route as SlugIconDotsvgRouteImport } from './routes/$slug/icon[.]svg'
 import { Route as SlugManifestDotwebmanifestRouteImport } from './routes/$slug/manifest[.]webmanifest'
 import { Route as SlugRequestedRouteImport } from './routes/$slug/requested'
 import { Route as SlugResetPasswordRouteImport } from './routes/$slug/reset-password'
@@ -69,6 +70,11 @@ const SlugHomeRoute = SlugHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => SlugRouteRoute,
 } as any)
+const SlugIconDotsvgRoute = SlugIconDotsvgRouteImport.update({
+  id: '/icon.svg',
+  path: '/icon.svg',
+  getParentRoute: () => SlugRouteRoute,
+} as any)
 const SlugManifestDotwebmanifestRoute =
   SlugManifestDotwebmanifestRouteImport.update({
     id: '/manifest.webmanifest',
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/$slug/bookings': typeof SlugBookingsRoute
   '/$slug/car': typeof SlugCarRoute
   '/$slug/home': typeof SlugHomeRoute
+  '/$slug/icon.svg': typeof SlugIconDotsvgRoute
   '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
   '/$slug/requested': typeof SlugRequestedRoute
   '/$slug/reset-password': typeof SlugResetPasswordRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/$slug/bookings': typeof SlugBookingsRoute
   '/$slug/car': typeof SlugCarRoute
   '/$slug/home': typeof SlugHomeRoute
+  '/$slug/icon.svg': typeof SlugIconDotsvgRoute
   '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
   '/$slug/requested': typeof SlugRequestedRoute
   '/$slug/reset-password': typeof SlugResetPasswordRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/$slug/bookings': typeof SlugBookingsRoute
   '/$slug/car': typeof SlugCarRoute
   '/$slug/home': typeof SlugHomeRoute
+  '/$slug/icon.svg': typeof SlugIconDotsvgRoute
   '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
   '/$slug/requested': typeof SlugRequestedRoute
   '/$slug/reset-password': typeof SlugResetPasswordRoute
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/$slug/bookings'
     | '/$slug/car'
     | '/$slug/home'
+    | '/$slug/icon.svg'
     | '/$slug/manifest.webmanifest'
     | '/$slug/requested'
     | '/$slug/reset-password'
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/$slug/bookings'
     | '/$slug/car'
     | '/$slug/home'
+    | '/$slug/icon.svg'
     | '/$slug/manifest.webmanifest'
     | '/$slug/requested'
     | '/$slug/reset-password'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/$slug/bookings'
     | '/$slug/car'
     | '/$slug/home'
+    | '/$slug/icon.svg'
     | '/$slug/manifest.webmanifest'
     | '/$slug/requested'
     | '/$slug/reset-password'
@@ -264,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugHomeRouteImport
       parentRoute: typeof SlugRouteRoute
     }
+    '/$slug/icon.svg': {
+      id: '/$slug/icon.svg'
+      path: '/icon.svg'
+      fullPath: '/$slug/icon.svg'
+      preLoaderRoute: typeof SlugIconDotsvgRouteImport
+      parentRoute: typeof SlugRouteRoute
+    }
     '/$slug/manifest.webmanifest': {
       id: '/$slug/manifest.webmanifest'
       path: '/manifest.webmanifest'
@@ -309,6 +328,7 @@ interface SlugRouteRouteChildren {
   SlugBookingsRoute: typeof SlugBookingsRoute
   SlugCarRoute: typeof SlugCarRoute
   SlugHomeRoute: typeof SlugHomeRoute
+  SlugIconDotsvgRoute: typeof SlugIconDotsvgRoute
   SlugManifestDotwebmanifestRoute: typeof SlugManifestDotwebmanifestRoute
   SlugRequestedRoute: typeof SlugRequestedRoute
   SlugResetPasswordRoute: typeof SlugResetPasswordRoute
@@ -324,6 +344,7 @@ const SlugRouteRouteChildren: SlugRouteRouteChildren = {
   SlugBookingsRoute: SlugBookingsRoute,
   SlugCarRoute: SlugCarRoute,
   SlugHomeRoute: SlugHomeRoute,
+  SlugIconDotsvgRoute: SlugIconDotsvgRoute,
   SlugManifestDotwebmanifestRoute: SlugManifestDotwebmanifestRoute,
   SlugRequestedRoute: SlugRequestedRoute,
   SlugResetPasswordRoute: SlugResetPasswordRoute,
