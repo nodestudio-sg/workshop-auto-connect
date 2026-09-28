@@ -206,7 +206,7 @@ function BookService() {
                     setTime(null);
                   }}
                   className={cn(
-                    "flex min-h-[76px] w-16 shrink-0 flex-col items-center justify-center rounded-xl border text-sm transition-colors",
+                     "flex min-h-[76px] w-16 shrink-0 flex-col items-center justify-center rounded-md border text-sm transition-colors",
                     date === value
                       ? "border-brand bg-brand text-brand-foreground shadow-sm"
                       : "border-border bg-card",
@@ -239,7 +239,7 @@ function BookService() {
                     aria-pressed={time === slot.time}
                     onClick={() => setTime(slot.time)}
                     className={cn(
-                      "min-h-[52px] rounded-xl border text-sm font-semibold transition-colors",
+                       "min-h-[52px] rounded-md border text-sm font-semibold transition-colors",
                       time === slot.time
                         ? "border-brand bg-brand text-brand-foreground shadow-sm"
                         : "border-border bg-card",
@@ -334,8 +334,10 @@ function Step({
       <div className="mb-3 flex items-center gap-2">
         <span
           className={cn(
-            "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold",
-            done ? "bg-brand text-brand-foreground" : "bg-muted text-muted-foreground",
+             "flex h-6 w-6 shrink-0 items-center justify-center rounded-sm border text-xs font-bold",
+             done
+               ? "border-brand-strong bg-brand-strong text-brand-foreground"
+               : "border-border bg-card text-muted-foreground",
           )}
         >
           {done ? <Check className="h-3.5 w-3.5" /> : number}

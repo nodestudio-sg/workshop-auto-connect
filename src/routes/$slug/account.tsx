@@ -50,7 +50,7 @@ function Account() {
       <ScreenHeader title="Account" />
       <main className="mx-auto w-full max-w-[420px] space-y-3 px-4 pb-28 pt-3">
         <div className="app-card flex items-center gap-4 p-4">
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-soft text-xl font-bold text-brand">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-border bg-brand-soft text-xl font-semibold text-brand-strong">
             {customer.name[0]?.toUpperCase()}
           </span>
           <div className="min-w-0">

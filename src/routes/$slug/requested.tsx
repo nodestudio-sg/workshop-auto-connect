@@ -324,7 +324,7 @@ function NextSteps({
             <div className="flex flex-col items-center">
               <span
                 className={cn(
-                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-bold",
+                   "flex h-6 w-6 shrink-0 items-center justify-center rounded-sm border text-xs font-bold",
                   step.done && "border-success bg-success text-white",
                   step.current && "border-attention bg-attention-soft text-attention",
                   !step.done && !step.current && "border-border text-muted-foreground",
