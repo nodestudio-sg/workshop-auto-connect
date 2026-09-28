@@ -1,9 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Clock, MapPin, Phone } from "lucide-react";
+import { CheckCircle2, Clock, MapPin, Phone, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { bookingStatus, type BookingStatus } from "@/lib/booking";
 import { money, shortDate } from "@/lib/format";
-import { Card, Loading, Page, Pill, TaxNote, TopBar, useWorkshop } from "@/components/app/workshop-ui";
+import {
+  Card,
+  Loading,
+  Page,
+  Pill,
+  TaxNote,
+  TopBar,
+  useWorkshop,
+} from "@/components/app/workshop-ui";
 
 type Snapshot = { name: string; price: number; quote_after_inspection: boolean };
 
@@ -49,26 +58,25 @@ function RequestSent() {
 
   const snapshot = (data?.price_snapshot ?? []) as unknown as Snapshot[];
   const total = Number(data?.estimate_total ?? 0);
+  // Columns from migration 0002, read loosely so the screen works without it.
+  const row = (data ?? {}) as Record<string, unknown>;
+  const status = bookingStatus(row["status"]);
+  // The tax rate saved with the request; older requests fall back to the
+  // workshop's current rate.
+  const taxRate = row["tax_rate"] != null ? Number(row["tax_rate"]) : Number(workshop.tax_rate);
+  const confirmedDate = typeof row["confirmed_date"] === "string" ? row["confirmed_date"] : null;
+  const confirmedTime = typeof row["confirmed_time"] === "string" ? row["confirmed_time"] : null;
 
   return (
     <>
       <TopBar />
       <Page>
-        <Card className="bg-attention-soft">
-          <div className="flex items-start gap-3">
-            <Clock className="mt-0.5 h-5 w-5 shrink-0 text-attention" />
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold">Slot requested</h1>
-                <Pill>Not confirmed</Pill>
-              </div>
-              <p className="mt-2 text-sm leading-relaxed">
-                This time is <span className="font-semibold">requested only</span>. {workshop.name}{" "}
-                will message you to confirm it, or to offer another time.
-              </p>
-            </div>
-          </div>
-        </Card>
+        <StatusCard
+          status={data ? status : "requested"}
+          workshopName={workshop.name}
+          confirmedDate={confirmedDate}
+          confirmedTime={confirmedTime}
+        />
 
         {data ? (
           <Card>
@@ -93,7 +101,7 @@ function RequestSent() {
               <span className="text-sm font-semibold">Estimate</span>
               <div className="text-right">
                 <span className="text-sm font-bold">{money(total)}</span>
-                <TaxNote taxRate={Number(workshop.tax_rate)} />
+                <TaxNote taxRate={taxRate} />
               </div>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
@@ -127,5 +135,87 @@ function RequestSent() {
         </Link>
       </Page>
     </>
+  );
+}
+
+function StatusCard({
+  status,
+  workshopName,
+  confirmedDate,
+  confirmedTime,
+}: {
+  status: BookingStatus;
+  workshopName: string;
+  confirmedDate: string | null;
+  confirmedTime: string | null;
+}) {
+  if (status === "confirmed") {
+    return (
+      <Card className="bg-success-soft">
+        <div className="flex items-start gap-3">
+          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" />
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-bold">Booking confirmed</h1>
+              <Pill tone="success">Confirmed</Pill>
+            </div>
+            <p className="mt-2 text-sm leading-relaxed">
+              {workshopName} has confirmed your booking
+              {confirmedDate && confirmedTime ? (
+                <>
+                  {" "}
+                  for{" "}
+                  <span className="font-semibold">
+                    {shortDate(confirmedDate)}, {confirmedTime}
+                  </span>
+                </>
+              ) : null}
+              .
+            </p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (status === "declined" || status === "cancelled") {
+    return (
+      <Card className="bg-muted">
+        <div className="flex items-start gap-3">
+          <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-bold">
+                {status === "declined" ? "Time not available" : "Booking cancelled"}
+              </h1>
+              <Pill tone="muted">{status === "declined" ? "Declined" : "Cancelled"}</Pill>
+            </div>
+            <p className="mt-2 text-sm leading-relaxed">
+              {status === "declined"
+                ? `${workshopName} couldn't take this time. Please choose another, or call the workshop.`
+                : `This booking is cancelled. Call ${workshopName} if you need to rebook.`}
+            </p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="bg-attention-soft">
+      <div className="flex items-start gap-3">
+        <Clock className="mt-0.5 h-5 w-5 shrink-0 text-attention" />
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-base font-bold">Slot requested</h1>
+            <Pill>Not confirmed</Pill>
+          </div>
+          <p className="mt-2 text-sm leading-relaxed">
+            This time is <span className="font-semibold">requested only</span>. {workshopName} will
+            message you to confirm it, or to offer another time.
+          </p>
+        </div>
+      </div>
+    </Card>
   );
 }
