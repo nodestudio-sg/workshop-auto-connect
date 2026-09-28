@@ -44,10 +44,10 @@ export function TopBar({
         {workshop.logo_url ? (
           <img
             src={workshop.logo_url}
-            alt=""
-            width={36}
-            height={36}
-            className="h-8 w-8 shrink-0 rounded-sm border border-border object-cover"
+            alt={`${workshop.name} logo`}
+            width={68}
+            height={40}
+            className="h-10 w-[68px] shrink-0 rounded-sm border border-border bg-card object-contain"
           />
         ) : null}
         <span className="truncate text-sm font-semibold uppercase tracking-wider">{workshop.name}</span>
