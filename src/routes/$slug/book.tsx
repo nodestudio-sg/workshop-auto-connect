@@ -1,7 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Check } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Check, ChevronDown, MessageSquareText } from "lucide-react";
 import { toast } from "sonner";
 import { useCustomer } from "@/hooks/use-customer";
 import { PricesChangedError, submitBookingRequest } from "@/lib/booking";
@@ -9,14 +9,13 @@ import { fetchServices, fetchSlots, type Service } from "@/lib/customer";
 import { dayLabel, money } from "@/lib/format";
 import {
   BrandButton,
-  Card,
   Loading,
-  Page,
   Pill,
   TaxNote,
   TopBar,
   useWorkshop,
 } from "@/components/app/workshop-ui";
+import { NumberPlate, VehicleSwitcher } from "@/components/app/app-shell";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/$slug/book")({
@@ -37,15 +36,18 @@ export const Route = createFileRoute("/$slug/book")({
   component: BookService,
 });
 
+const NOTES_MAX = 500;
+
 function BookService() {
   const { slug } = Route.useParams();
   const workshop = useWorkshop();
   const navigate = useNavigate();
-  const { data, isLoading } = useCustomer(slug);
+  const { data, isLoading, selectVehicle } = useCustomer(slug);
 
   const [selected, setSelected] = useState<string[]>([]);
   const [date, setDate] = useState<string | null>(null);
   const [time, setTime] = useState<string | null>(null);
+  const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
 
   const servicesQuery = useQuery({
@@ -61,12 +63,13 @@ function BookService() {
   const chosen = services.filter((service) => selected.includes(service.id));
   const total = chosen.reduce((sum, service) => sum + service.price, 0);
   const hasQuoteItem = chosen.some((service) => service.quote_after_inspection);
+  const vehicle = data?.vehicle ?? null;
 
   // One key per distinct submission: a retry of the same choices reuses it, so
   // a lost response can't create a duplicate request. Changing the choices
   // makes it a new submission.
   const idempotencyKey = useRef(crypto.randomUUID());
-  const selectionKey = `${[...selected].sort().join(",")}|${date}|${time}`;
+  const selectionKey = `${vehicle?.id}|${[...selected].sort().join(",")}|${date}|${time}|${notes}`;
   useEffect(() => {
     idempotencyKey.current = crypto.randomUUID();
   }, [selectionKey]);
@@ -78,13 +81,12 @@ function BookService() {
       list.push({ time: slot.slot_time, available: slot.available });
       byDate.set(slot.slot_date, list);
     }
-    return Array.from(byDate.entries()).slice(0, 10);
+    return Array.from(byDate.entries()).slice(0, 14);
   }, [slotsQuery.data]);
 
   const times = dates.find(([value]) => value === date)?.[1] ?? [];
 
   if (isLoading || !data) return <Loading />;
-  const vehicle = data.vehicle;
 
   async function submit() {
     if (!date || !time || !vehicle || chosen.length === 0) return;
@@ -99,6 +101,7 @@ function BookService() {
         preferredDate: date,
         preferredTime: time,
         idempotencyKey: idempotencyKey.current,
+        notes: notes.trim(),
       });
       navigate({ to: "/$slug/requested", params: { slug }, search: { id } });
     } catch (error) {
@@ -114,39 +117,81 @@ function BookService() {
     }
   }
 
-  const canSubmit = chosen.length > 0 && Boolean(date) && Boolean(time) && !busy;
+  const missing = !vehicle
+    ? "Add your car first"
+    : chosen.length === 0
+      ? "Choose a service"
+      : !date
+        ? "Pick a date"
+        : !time
+          ? "Pick a time"
+          : null;
+  const canSubmit = !missing && !busy;
 
   return (
     <>
-      <TopBar backTo={{ to: "/$slug/car", params: { slug } }} />
-      <Page>
+      <TopBar backTo={{ to: "/$slug/home", params: { slug } }} />
+      <main className="mx-auto w-full max-w-[420px] space-y-6 px-4 pb-48 pt-4">
         <div>
-          <h1 className="text-lg font-bold">Book a service</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Book a service</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            For {vehicle?.plate} · {vehicle?.make} {vehicle?.model}
+            Pick what you need and a time that suits you. {workshop.name} confirms it with you.
           </p>
         </div>
 
-        <div className="space-y-3">
-          {services.map((service) => (
-            <ServiceCard
-              key={service.id}
-              service={service}
-              checked={selected.includes(service.id)}
-              onToggle={() =>
-                setSelected((current) =>
-                  current.includes(service.id)
-                    ? current.filter((id) => id !== service.id)
-                    : [...current, service.id],
-                )
-              }
-            />
-          ))}
-        </div>
+        <Step number={1} title="Your car" done={Boolean(vehicle)}>
+          {vehicle ? (
+            <>
+              <div className="app-card flex items-center gap-3 p-4">
+                <NumberPlate plate={vehicle.plate} className="text-base" />
+                <p className="min-w-0 truncate text-sm font-medium">
+                  {vehicle.make} {vehicle.model}
+                </p>
+              </div>
+              {data.vehicles.length > 1 ? (
+                <div className="mt-3">
+                  <VehicleSwitcher
+                    slug={slug}
+                    vehicles={data.vehicles}
+                    selectedId={vehicle.id}
+                    onSelect={(id) => void selectVehicle(id)}
+                  />
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <Link
+              to="/$slug/add-car"
+              params={{ slug }}
+              className="app-card flex min-h-[56px] items-center justify-center border-dashed text-sm font-semibold text-brand"
+            >
+              + Add your car to book
+            </Link>
+          )}
+        </Step>
 
-        <div className="pt-2">
-          <h2 className="text-sm font-semibold">Preferred date</h2>
-          <div className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
+        <Step number={2} title="Choose services" done={chosen.length > 0}>
+          <div className="space-y-3">
+            {servicesQuery.isLoading ? <Loading /> : null}
+            {services.map((service) => (
+              <ServiceCard
+                key={service.id}
+                service={service}
+                checked={selected.includes(service.id)}
+                onToggle={() =>
+                  setSelected((current) =>
+                    current.includes(service.id)
+                      ? current.filter((id) => id !== service.id)
+                      : [...current, service.id],
+                  )
+                }
+              />
+            ))}
+          </div>
+        </Step>
+
+        <Step number={3} title="Pick a date" done={Boolean(date)}>
+          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
             {dates.map(([value, slots]) => {
               const label = dayLabel(value);
               const anyFree = slots.some((slot) => slot.available);
@@ -155,14 +200,15 @@ function BookService() {
                   key={value}
                   type="button"
                   disabled={!anyFree}
+                  aria-pressed={date === value}
                   onClick={() => {
                     setDate(value);
                     setTime(null);
                   }}
                   className={cn(
-                    "flex min-h-[72px] w-16 shrink-0 flex-col items-center justify-center rounded-md border text-sm",
+                    "flex min-h-[76px] w-16 shrink-0 flex-col items-center justify-center rounded-xl border text-sm transition-colors",
                     date === value
-                      ? "border-brand bg-brand text-brand-foreground"
+                      ? "border-brand bg-brand text-brand-foreground shadow-sm"
                       : "border-border bg-card",
                     !anyFree && "opacity-40",
                   )}
@@ -174,67 +220,95 @@ function BookService() {
               );
             })}
           </div>
-        </div>
-
-        {date ? (
-          <div>
-            <h2 className="text-sm font-semibold">Preferred time</h2>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {times.map((slot) => (
-                <button
-                  key={slot.time}
-                  type="button"
-                  disabled={!slot.available}
-                  onClick={() => setTime(slot.time)}
-                  className={cn(
-                    "min-h-[52px] rounded-md border text-sm font-medium",
-                    time === slot.time
-                      ? "border-brand bg-brand text-brand-foreground"
-                      : "border-border bg-card",
-                    !slot.available &&
-                      "cursor-not-allowed bg-muted text-muted-foreground/60 line-through",
-                  )}
-                >
-                  {slot.time}
-                </button>
-              ))}
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Crossed-out times are already taken.
+          {!slotsQuery.isLoading && dates.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No online times right now. Please call {workshop.name}.
             </p>
+          ) : null}
+        </Step>
+
+        <Step number={4} title="Pick a time" done={Boolean(time)}>
+          {date ? (
+            <>
+              <div className="grid grid-cols-3 gap-2">
+                {times.map((slot) => (
+                  <button
+                    key={slot.time}
+                    type="button"
+                    disabled={!slot.available}
+                    aria-pressed={time === slot.time}
+                    onClick={() => setTime(slot.time)}
+                    className={cn(
+                      "min-h-[52px] rounded-xl border text-sm font-semibold transition-colors",
+                      time === slot.time
+                        ? "border-brand bg-brand text-brand-foreground shadow-sm"
+                        : "border-border bg-card",
+                      !slot.available &&
+                        "cursor-not-allowed bg-muted text-muted-foreground/60 line-through",
+                    )}
+                  >
+                    {slot.time}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">Crossed-out times are taken.</p>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">Pick a date first.</p>
+          )}
+        </Step>
+
+        <Step number={5} title="Anything we should know?" optional>
+          <div className="app-card p-3">
+            <div className="flex gap-2">
+              <MessageSquareText className="mt-2.5 h-4 w-4 shrink-0 text-muted-foreground" />
+              <textarea
+                aria-label="Notes for the workshop"
+                placeholder="e.g. Squeaking when braking, aircon not cold, need the car back by 5pm"
+                value={notes}
+                maxLength={NOTES_MAX}
+                rows={3}
+                onChange={(event) => setNotes(event.target.value)}
+                className="min-h-[72px] w-full resize-none bg-transparent py-2 text-base outline-none"
+              />
+            </div>
+            {notes.length > NOTES_MAX - 100 ? (
+              <p className="text-right text-xs text-muted-foreground">
+                {notes.length}/{NOTES_MAX}
+              </p>
+            ) : null}
           </div>
-        ) : null}
+        </Step>
+      </main>
 
-        <Card>
-          <h2 className="text-sm font-semibold">Your details</h2>
-          <dl className="mt-3 space-y-2 text-sm">
-            <Row label="Name" value={data.customer.name} />
-            <Row label="Mobile" value={`+65 ${data.customer.mobile}`} />
-            <Row label="Vehicle" value={vehicle ? `${vehicle.plate} · ${vehicle.model}` : "—"} />
-          </dl>
-        </Card>
-      </Page>
-
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card px-4 pb-[env(safe-area-inset-bottom)] pt-3">
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 px-4 pb-[env(safe-area-inset-bottom)] pt-3 backdrop-blur">
         <div className="mx-auto w-full max-w-[420px] pb-3">
-          <div className="mb-3 flex items-end justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground">
+          <div className="mb-3 flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <p className="truncate text-xs text-muted-foreground">
                 {chosen.length === 0
                   ? "Nothing selected yet"
-                  : `${chosen.length} item${chosen.length > 1 ? "s" : ""} selected`}
+                  : chosen.map((service) => service.name).join(", ")}
               </p>
-              <p className="text-lg font-bold">{money(total)}</p>
-              <TaxNote taxRate={Number(workshop.tax_rate)} />
-              {hasQuoteItem ? (
-                <p className="text-xs text-muted-foreground">
-                  Some work is quoted after inspection
+              {date && time ? (
+                <p className="text-xs font-medium">
+                  {dayLabel(date).weekday} {dayLabel(date).day} {dayLabel(date).month}, {time}{" "}
+                  <span className="font-normal text-muted-foreground">· to be confirmed</span>
                 </p>
               ) : null}
             </div>
+            <div className="shrink-0 text-right">
+              <p className="text-lg font-bold">{money(total)}</p>
+              <TaxNote taxRate={Number(workshop.tax_rate)} />
+            </div>
           </div>
+          {hasQuoteItem ? (
+            <p className="mb-2 text-xs text-muted-foreground">
+              Some work is quoted after inspection.
+            </p>
+          ) : null}
           <BrandButton disabled={!canSubmit} onClick={() => void submit()}>
-            {busy ? "Sending…" : "Request this slot"}
+            {busy ? "Sending…" : (missing ?? "Request this time")}
           </BrandButton>
         </div>
       </div>
@@ -242,12 +316,35 @@ function BookService() {
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Step({
+  number,
+  title,
+  done = false,
+  optional = false,
+  children,
+}: {
+  number: number;
+  title: string;
+  done?: boolean;
+  optional?: boolean;
+  children: ReactNode;
+}) {
   return (
-    <div className="flex justify-between gap-3">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="text-right font-medium">{value}</dd>
-    </div>
+    <section>
+      <div className="mb-3 flex items-center gap-2">
+        <span
+          className={cn(
+            "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold",
+            done ? "bg-brand text-brand-foreground" : "bg-muted text-muted-foreground",
+          )}
+        >
+          {done ? <Check className="h-3.5 w-3.5" /> : number}
+        </span>
+        <h2 className="text-[15px] font-semibold">{title}</h2>
+        {optional ? <span className="text-xs text-muted-foreground">Optional</span> : null}
+      </div>
+      {children}
+    </section>
   );
 }
 
@@ -260,20 +357,24 @@ function ServiceCard({
   checked: boolean;
   onToggle: () => void;
 }) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-pressed={checked}
+    <div
       className={cn(
-        "app-card w-full p-4 text-left transition-colors",
+        "app-card overflow-hidden transition-colors",
         checked && "border-brand ring-1 ring-brand",
       )}
     >
-      <div className="flex items-start gap-3">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-pressed={checked}
+        className="flex w-full items-start gap-3 p-4 text-left"
+      >
         <span
           className={cn(
-            "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded border",
+            "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border",
             checked ? "border-brand bg-brand text-brand-foreground" : "border-border",
           )}
         >
@@ -293,18 +394,33 @@ function ServiceCard({
               {service.description}
             </p>
           ) : null}
-          <ul className="mt-3 space-y-1 border-t border-border pt-3 text-xs">
-            {service.components.map((item, index) => (
-              <li key={index} className="flex justify-between gap-3">
-                <span className="text-muted-foreground">{item.label}</span>
-                <span className="shrink-0">
-                  {service.quote_after_inspection ? "Quoted after check" : money(item.amount)}
-                </span>
-              </li>
-            ))}
-          </ul>
         </div>
-      </div>
-    </button>
+      </button>
+      {service.components.length > 0 ? (
+        <>
+          <button
+            type="button"
+            onClick={() => setOpen((value) => !value)}
+            aria-expanded={open}
+            className="flex w-full items-center justify-between border-t border-border px-4 py-2.5 text-xs font-medium text-muted-foreground"
+          >
+            What's included ({service.components.length})
+            <ChevronDown className={cn("h-4 w-4 transition-transform", open && "rotate-180")} />
+          </button>
+          {open ? (
+            <ul className="space-y-1 px-4 pb-4 text-xs">
+              {service.components.map((item, index) => (
+                <li key={index} className="flex justify-between gap-3">
+                  <span className="text-muted-foreground">{item.label}</span>
+                  <span className="shrink-0">
+                    {service.quote_after_inspection ? "Quoted after check" : money(item.amount)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </>
+      ) : null}
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { CalendarClock, ChevronDown, FileText, Wrench } from "lucide-react";
+import { CalendarClock, CalendarPlus, ChevronDown, FileText, Wrench } from "lucide-react";
 import { useCustomer } from "@/hooks/use-customer";
 import { fetchJobs, type Job } from "@/lib/customer";
 import { km, money, shortDate } from "@/lib/format";
@@ -13,9 +13,16 @@ import {
   Page,
   Pill,
   TaxNote,
-  TopBar,
   useWorkshop,
 } from "@/components/app/workshop-ui";
+import {
+  CarIllustration,
+  NumberPlate,
+  ScreenHeader,
+  SectionTitle,
+  TabBar,
+  VehicleSwitcher,
+} from "@/components/app/app-shell";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/$slug/car")({
@@ -36,7 +43,7 @@ export const Route = createFileRoute("/$slug/car")({
 function MyCar() {
   const { slug } = Route.useParams();
   const workshop = useWorkshop();
-  const { data, isLoading } = useCustomer(slug);
+  const { data, isLoading, selectVehicle } = useCustomer(slug);
   const vehicle = data?.vehicle ?? null;
 
   const jobsQuery = useQuery({
@@ -54,21 +61,27 @@ function MyCar() {
 
   return (
     <>
-      <TopBar showSignOut />
+      <ScreenHeader title={data.vehicles.length > 1 ? "My cars" : "My car"} />
       <Page>
-        <p className="text-sm text-muted-foreground">Hello {data.customer.name.split(" ")[0]}</p>
-
+        <VehicleSwitcher
+          slug={slug}
+          vehicles={data.vehicles}
+          selectedId={vehicle?.id ?? null}
+          onSelect={(id) => void selectVehicle(id)}
+        />
         {vehicle ? (
           <Card>
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-xl font-bold tracking-wide">{vehicle.plate}</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">
-                  {vehicle.make} {vehicle.model} · {vehicle.year}
+                <NumberPlate plate={vehicle.plate} />
+                <p className="mt-2 text-base font-semibold">
+                  {vehicle.make} {vehicle.model}
                 </p>
+                <p className="text-sm text-muted-foreground">{vehicle.year}</p>
               </div>
               <Pill tone="brand">{km(vehicle.mileage_km)}</Pill>
             </div>
+            <CarIllustration className="mx-auto mt-3 h-20 w-auto" />
             <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4 text-sm">
               <div>
                 <dt className="text-xs text-muted-foreground">Engine oil</dt>
@@ -83,6 +96,23 @@ function MyCar() {
             </dl>
           </Card>
         ) : null}
+
+        {!vehicle ? (
+          <Card>
+            <p className="text-sm font-semibold">No car added yet</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Tap “Add car” above to add your plate, or {workshop.name} will add it on your first
+              visit.
+            </p>
+          </Card>
+        ) : null}
+
+        <Link to="/$slug/book" params={{ slug }}>
+          <BrandButton>
+            <CalendarPlus className="mr-2 h-5 w-5" />
+            Book a service
+          </BrandButton>
+        </Link>
 
         {activeJob ? (
           <Link
@@ -113,20 +143,13 @@ function MyCar() {
           </Card>
         ) : null}
 
-        <div className="flex items-center justify-between pt-2">
-          <h2 className="text-sm font-semibold">Service history</h2>
-          {unpaidCount > 0 ? <Pill>{unpaidCount} unpaid</Pill> : null}
-        </div>
+        <SectionTitle action={unpaidCount > 0 ? <Pill>{unpaidCount} unpaid</Pill> : null}>
+          Service history
+        </SectionTitle>
 
         <div className="space-y-3">
           {history.map((job) => (
-            <HistoryItem
-              key={job.id}
-              job={job}
-              slug={slug}
-              taxRate={Number(workshop.tax_rate)}
-            />
-
+            <HistoryItem key={job.id} job={job} slug={slug} taxRate={Number(workshop.tax_rate)} />
           ))}
           {history.length === 0 ? (
             <Card>
@@ -136,13 +159,7 @@ function MyCar() {
         </div>
       </Page>
 
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card px-4 pb-[env(safe-area-inset-bottom)] pt-3">
-        <div className="mx-auto w-full max-w-[420px] pb-3">
-          <Link to="/$slug/book" params={{ slug }}>
-            <BrandButton>Book a service</BrandButton>
-          </Link>
-        </div>
-      </div>
+      <TabBar slug={slug} active="car" />
     </>
   );
 }
@@ -156,7 +173,6 @@ function HistoryItem({
   slug: string;
   taxRate: number;
 }) {
-
   const [open, setOpen] = useState(false);
 
   return (
@@ -230,7 +246,6 @@ function HistoryItem({
               View invoice {job.invoice_no}
             </Link>
           ) : null}
-
         </div>
       ) : null}
     </div>

@@ -12,10 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SlugRouteRouteImport } from './routes/$slug/route'
 import { Route as SlugIndexRouteImport } from './routes/$slug/index'
+import { Route as SlugAccountRouteImport } from './routes/$slug/account'
+import { Route as SlugAddCarRouteImport } from './routes/$slug/add-car'
 import { Route as SlugBookRouteImport } from './routes/$slug/book'
+import { Route as SlugBookingsRouteImport } from './routes/$slug/bookings'
 import { Route as SlugCarRouteImport } from './routes/$slug/car'
+import { Route as SlugHomeRouteImport } from './routes/$slug/home'
 import { Route as SlugManifestDotwebmanifestRouteImport } from './routes/$slug/manifest[.]webmanifest'
 import { Route as SlugRequestedRouteImport } from './routes/$slug/requested'
+import { Route as SlugResetPasswordRouteImport } from './routes/$slug/reset-password'
 import { Route as SlugTodayRouteImport } from './routes/$slug/today'
 import { Route as SlugInvoiceJobIdRouteImport } from './routes/$slug/invoice.$jobId'
 
@@ -34,14 +39,34 @@ const SlugIndexRoute = SlugIndexRouteImport.update({
   path: '/',
   getParentRoute: () => SlugRouteRoute,
 } as any)
+const SlugAccountRoute = SlugAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => SlugRouteRoute,
+} as any)
+const SlugAddCarRoute = SlugAddCarRouteImport.update({
+  id: '/add-car',
+  path: '/add-car',
+  getParentRoute: () => SlugRouteRoute,
+} as any)
 const SlugBookRoute = SlugBookRouteImport.update({
   id: '/book',
   path: '/book',
   getParentRoute: () => SlugRouteRoute,
 } as any)
+const SlugBookingsRoute = SlugBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => SlugRouteRoute,
+} as any)
 const SlugCarRoute = SlugCarRouteImport.update({
   id: '/car',
   path: '/car',
+  getParentRoute: () => SlugRouteRoute,
+} as any)
+const SlugHomeRoute = SlugHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => SlugRouteRoute,
 } as any)
 const SlugManifestDotwebmanifestRoute =
@@ -53,6 +78,11 @@ const SlugManifestDotwebmanifestRoute =
 const SlugRequestedRoute = SlugRequestedRouteImport.update({
   id: '/requested',
   path: '/requested',
+  getParentRoute: () => SlugRouteRoute,
+} as any)
+const SlugResetPasswordRoute = SlugResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => SlugRouteRoute,
 } as any)
 const SlugTodayRoute = SlugTodayRouteImport.update({
@@ -69,20 +99,30 @@ const SlugInvoiceJobIdRoute = SlugInvoiceJobIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRouteRouteWithChildren
+  '/$slug/account': typeof SlugAccountRoute
+  '/$slug/add-car': typeof SlugAddCarRoute
   '/$slug/book': typeof SlugBookRoute
+  '/$slug/bookings': typeof SlugBookingsRoute
   '/$slug/car': typeof SlugCarRoute
+  '/$slug/home': typeof SlugHomeRoute
   '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
   '/$slug/requested': typeof SlugRequestedRoute
+  '/$slug/reset-password': typeof SlugResetPasswordRoute
   '/$slug/today': typeof SlugTodayRoute
   '/$slug/': typeof SlugIndexRoute
   '/$slug/invoice/$jobId': typeof SlugInvoiceJobIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$slug/account': typeof SlugAccountRoute
+  '/$slug/add-car': typeof SlugAddCarRoute
   '/$slug/book': typeof SlugBookRoute
+  '/$slug/bookings': typeof SlugBookingsRoute
   '/$slug/car': typeof SlugCarRoute
+  '/$slug/home': typeof SlugHomeRoute
   '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
   '/$slug/requested': typeof SlugRequestedRoute
+  '/$slug/reset-password': typeof SlugResetPasswordRoute
   '/$slug/today': typeof SlugTodayRoute
   '/$slug': typeof SlugIndexRoute
   '/$slug/invoice/$jobId': typeof SlugInvoiceJobIdRoute
@@ -91,10 +131,15 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$slug': typeof SlugRouteRouteWithChildren
+  '/$slug/account': typeof SlugAccountRoute
+  '/$slug/add-car': typeof SlugAddCarRoute
   '/$slug/book': typeof SlugBookRoute
+  '/$slug/bookings': typeof SlugBookingsRoute
   '/$slug/car': typeof SlugCarRoute
+  '/$slug/home': typeof SlugHomeRoute
   '/$slug/manifest.webmanifest': typeof SlugManifestDotwebmanifestRoute
   '/$slug/requested': typeof SlugRequestedRoute
+  '/$slug/reset-password': typeof SlugResetPasswordRoute
   '/$slug/today': typeof SlugTodayRoute
   '/$slug/': typeof SlugIndexRoute
   '/$slug/invoice/$jobId': typeof SlugInvoiceJobIdRoute
@@ -104,20 +149,30 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$slug'
+    | '/$slug/account'
+    | '/$slug/add-car'
     | '/$slug/book'
+    | '/$slug/bookings'
     | '/$slug/car'
+    | '/$slug/home'
     | '/$slug/manifest.webmanifest'
     | '/$slug/requested'
+    | '/$slug/reset-password'
     | '/$slug/today'
     | '/$slug/'
     | '/$slug/invoice/$jobId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$slug/account'
+    | '/$slug/add-car'
     | '/$slug/book'
+    | '/$slug/bookings'
     | '/$slug/car'
+    | '/$slug/home'
     | '/$slug/manifest.webmanifest'
     | '/$slug/requested'
+    | '/$slug/reset-password'
     | '/$slug/today'
     | '/$slug'
     | '/$slug/invoice/$jobId'
@@ -125,10 +180,15 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$slug'
+    | '/$slug/account'
+    | '/$slug/add-car'
     | '/$slug/book'
+    | '/$slug/bookings'
     | '/$slug/car'
+    | '/$slug/home'
     | '/$slug/manifest.webmanifest'
     | '/$slug/requested'
+    | '/$slug/reset-password'
     | '/$slug/today'
     | '/$slug/'
     | '/$slug/invoice/$jobId'
@@ -162,6 +222,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugIndexRouteImport
       parentRoute: typeof SlugRouteRoute
     }
+    '/$slug/account': {
+      id: '/$slug/account'
+      path: '/account'
+      fullPath: '/$slug/account'
+      preLoaderRoute: typeof SlugAccountRouteImport
+      parentRoute: typeof SlugRouteRoute
+    }
+    '/$slug/add-car': {
+      id: '/$slug/add-car'
+      path: '/add-car'
+      fullPath: '/$slug/add-car'
+      preLoaderRoute: typeof SlugAddCarRouteImport
+      parentRoute: typeof SlugRouteRoute
+    }
     '/$slug/book': {
       id: '/$slug/book'
       path: '/book'
@@ -169,11 +243,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugBookRouteImport
       parentRoute: typeof SlugRouteRoute
     }
+    '/$slug/bookings': {
+      id: '/$slug/bookings'
+      path: '/bookings'
+      fullPath: '/$slug/bookings'
+      preLoaderRoute: typeof SlugBookingsRouteImport
+      parentRoute: typeof SlugRouteRoute
+    }
     '/$slug/car': {
       id: '/$slug/car'
       path: '/car'
       fullPath: '/$slug/car'
       preLoaderRoute: typeof SlugCarRouteImport
+      parentRoute: typeof SlugRouteRoute
+    }
+    '/$slug/home': {
+      id: '/$slug/home'
+      path: '/home'
+      fullPath: '/$slug/home'
+      preLoaderRoute: typeof SlugHomeRouteImport
       parentRoute: typeof SlugRouteRoute
     }
     '/$slug/manifest.webmanifest': {
@@ -188,6 +276,13 @@ declare module '@tanstack/react-router' {
       path: '/requested'
       fullPath: '/$slug/requested'
       preLoaderRoute: typeof SlugRequestedRouteImport
+      parentRoute: typeof SlugRouteRoute
+    }
+    '/$slug/reset-password': {
+      id: '/$slug/reset-password'
+      path: '/reset-password'
+      fullPath: '/$slug/reset-password'
+      preLoaderRoute: typeof SlugResetPasswordRouteImport
       parentRoute: typeof SlugRouteRoute
     }
     '/$slug/today': {
@@ -208,20 +303,30 @@ declare module '@tanstack/react-router' {
 }
 
 interface SlugRouteRouteChildren {
+  SlugAccountRoute: typeof SlugAccountRoute
+  SlugAddCarRoute: typeof SlugAddCarRoute
   SlugBookRoute: typeof SlugBookRoute
+  SlugBookingsRoute: typeof SlugBookingsRoute
   SlugCarRoute: typeof SlugCarRoute
+  SlugHomeRoute: typeof SlugHomeRoute
   SlugManifestDotwebmanifestRoute: typeof SlugManifestDotwebmanifestRoute
   SlugRequestedRoute: typeof SlugRequestedRoute
+  SlugResetPasswordRoute: typeof SlugResetPasswordRoute
   SlugTodayRoute: typeof SlugTodayRoute
   SlugIndexRoute: typeof SlugIndexRoute
   SlugInvoiceJobIdRoute: typeof SlugInvoiceJobIdRoute
 }
 
 const SlugRouteRouteChildren: SlugRouteRouteChildren = {
+  SlugAccountRoute: SlugAccountRoute,
+  SlugAddCarRoute: SlugAddCarRoute,
   SlugBookRoute: SlugBookRoute,
+  SlugBookingsRoute: SlugBookingsRoute,
   SlugCarRoute: SlugCarRoute,
+  SlugHomeRoute: SlugHomeRoute,
   SlugManifestDotwebmanifestRoute: SlugManifestDotwebmanifestRoute,
   SlugRequestedRoute: SlugRequestedRoute,
+  SlugResetPasswordRoute: SlugResetPasswordRoute,
   SlugTodayRoute: SlugTodayRoute,
   SlugIndexRoute: SlugIndexRoute,
   SlugInvoiceJobIdRoute: SlugInvoiceJobIdRoute,

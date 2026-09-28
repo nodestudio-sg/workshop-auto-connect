@@ -1,6 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { CheckCircle2, Clock, MapPin, Phone, XCircle } from "lucide-react";
+import {
+  CalendarPlus,
+  Check,
+  CheckCircle2,
+  Clock,
+  MapPin,
+  MessageCircle,
+  MessageSquareText,
+  Phone,
+  XCircle,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { bookingStatus, type BookingStatus } from "@/lib/booking";
 import { money, shortDate } from "@/lib/format";
@@ -13,6 +23,8 @@ import {
   TopBar,
   useWorkshop,
 } from "@/components/app/workshop-ui";
+import { directionsUrl, NumberPlate, phoneLinks } from "@/components/app/app-shell";
+import { cn } from "@/lib/utils";
 
 type Snapshot = { name: string; price: number; quote_after_inspection: boolean };
 
@@ -45,7 +57,7 @@ function RequestSent() {
     queryFn: async () => {
       const { data: row } = await supabase
         .from("booking_requests")
-        .select("*")
+        .select("*, vehicles(plate, make, model)")
         .eq("id", id)
         .eq("workshop_id", workshop.id)
         .maybeSingle();
@@ -66,10 +78,13 @@ function RequestSent() {
   const taxRate = row["tax_rate"] != null ? Number(row["tax_rate"]) : Number(workshop.tax_rate);
   const confirmedDate = typeof row["confirmed_date"] === "string" ? row["confirmed_date"] : null;
   const confirmedTime = typeof row["confirmed_time"] === "string" ? row["confirmed_time"] : null;
+  const notes = typeof row["customer_notes"] === "string" ? row["customer_notes"] : null;
+  const car = row["vehicles"] as { plate: string; make: string; model: string } | null;
+  const links = phoneLinks(workshop.phone);
 
   return (
     <>
-      <TopBar />
+      <TopBar backTo={{ to: "/$slug/home", params: { slug } }} />
       <Page>
         <StatusCard
           status={data ? status : "requested"}
@@ -78,9 +93,36 @@ function RequestSent() {
           confirmedTime={confirmedTime}
         />
 
+        {data && (status === "requested" || status === "confirmed") ? (
+          <NextSteps status={status} workshopName={workshop.name} />
+        ) : null}
+
+        {data && status === "confirmed" && confirmedDate && confirmedTime ? (
+          <a
+            href={calendarFile({
+              date: confirmedDate,
+              time: confirmedTime,
+              title: `${snapshot.map((item) => item.name).join(", ") || "Car service"} — ${workshop.name}`,
+              location: workshop.address,
+            })}
+            download="booking.ics"
+            className="app-card flex min-h-[52px] items-center justify-center gap-2 text-[15px] font-semibold text-brand"
+          >
+            <CalendarPlus className="h-5 w-5" /> Add to calendar
+          </a>
+        ) : null}
+
         {data ? (
           <Card>
             <h2 className="text-sm font-semibold">Your request</h2>
+            {car ? (
+              <div className="mt-3 flex items-center gap-3">
+                <NumberPlate plate={car.plate} className="text-sm" />
+                <span className="truncate text-sm text-muted-foreground">
+                  {car.make} {car.model}
+                </span>
+              </div>
+            ) : null}
             <dl className="mt-3 space-y-2 text-sm">
               <div className="flex justify-between gap-3">
                 <dt className="text-muted-foreground">Requested time</dt>
@@ -104,6 +146,12 @@ function RequestSent() {
                 <TaxNote taxRate={taxRate} />
               </div>
             </div>
+            {notes ? (
+              <div className="mt-3 flex gap-2 rounded-lg bg-muted p-3 text-sm">
+                <MessageSquareText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                <p className="whitespace-pre-wrap">{notes}</p>
+              </div>
+            ) : null}
             <p className="mt-2 text-xs text-muted-foreground">
               This is an estimate of the work you chose. Anything extra is always quoted to you
               first.
@@ -117,21 +165,24 @@ function RequestSent() {
             <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
             {workshop.address}
           </p>
-          <a
-            href={`tel:${workshop.phone.replace(/\s/g, "")}`}
-            className="mt-3 flex min-h-[44px] items-center gap-2 text-sm font-medium text-brand"
-          >
-            <Phone className="h-4 w-4" />
-            {workshop.phone}
-          </a>
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            <ContactButton href={links.tel} icon={Phone} label="Call" />
+            <ContactButton href={links.whatsapp} icon={MessageCircle} label="WhatsApp" external />
+            <ContactButton
+              href={directionsUrl(workshop.address)}
+              icon={MapPin}
+              label="Directions"
+              external
+            />
+          </div>
         </Card>
 
         <Link
-          to="/$slug/car"
+          to="/$slug/bookings"
           params={{ slug }}
           className="flex min-h-[52px] w-full items-center justify-center rounded-md border border-border bg-card text-[15px] font-semibold"
         >
-          Back to my car
+          See all bookings
         </Link>
       </Page>
     </>
@@ -218,4 +269,123 @@ function StatusCard({
       </div>
     </Card>
   );
+}
+
+function ContactButton({
+  href,
+  icon: Icon,
+  label,
+  external = false,
+}: {
+  href: string;
+  icon: typeof Phone;
+  label: string;
+  external?: boolean;
+}) {
+  return (
+    <a
+      href={href}
+      {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
+      className="flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-lg border border-border text-xs font-medium"
+    >
+      <Icon className="h-4 w-4 text-brand" />
+      {label}
+    </a>
+  );
+}
+
+/** What happens after sending a request, so a pending request never feels final. */
+function NextSteps({
+  status,
+  workshopName,
+}: {
+  status: "requested" | "confirmed";
+  workshopName: string;
+}) {
+  const steps = [
+    { label: "Request sent", done: true },
+    {
+      label:
+        status === "confirmed"
+          ? `${workshopName} confirmed your time`
+          : `${workshopName} confirms your time`,
+      hint: status === "confirmed" ? undefined : "Usually by WhatsApp or a phone call",
+      done: status === "confirmed",
+      current: status === "requested",
+    },
+    { label: "Bring your car in", done: false, current: status === "confirmed" },
+  ];
+  return (
+    <Card>
+      <h2 className="text-sm font-semibold">What happens next</h2>
+      <ol className="mt-3">
+        {steps.map((step, index) => (
+          <li key={step.label} className="flex gap-3">
+            <div className="flex flex-col items-center">
+              <span
+                className={cn(
+                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-bold",
+                  step.done && "border-success bg-success text-white",
+                  step.current && "border-attention bg-attention-soft text-attention",
+                  !step.done && !step.current && "border-border text-muted-foreground",
+                )}
+              >
+                {step.done ? <Check className="h-3.5 w-3.5" /> : index + 1}
+              </span>
+              {index < steps.length - 1 ? (
+                <span
+                  className={cn("w-px flex-1", step.done ? "bg-success" : "bg-border")}
+                  style={{ minHeight: 16 }}
+                />
+              ) : null}
+            </div>
+            <div className="pb-4">
+              <p
+                className={cn(
+                  "text-sm",
+                  step.current ? "font-semibold" : step.done ? "" : "text-muted-foreground",
+                )}
+              >
+                {step.label}
+              </p>
+              {step.hint ? <p className="text-xs text-muted-foreground">{step.hint}</p> : null}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </Card>
+  );
+}
+
+/** An .ics file for a confirmed booking (Singapore time, 1 hour). */
+function calendarFile({
+  date,
+  time,
+  title,
+  location,
+}: {
+  date: string;
+  time: string;
+  title: string;
+  location: string;
+}): string {
+  const [hour = "9", minute = "0"] = time.split(":");
+  const start = `${date.replace(/-/g, "")}T${hour.padStart(2, "0")}${minute.padStart(2, "0")}00`;
+  const endHour = String(Math.min(23, Number(hour) + 1)).padStart(2, "0");
+  const end = `${date.replace(/-/g, "")}T${endHour}${minute.padStart(2, "0")}00`;
+  const escape = (value: string) => value.replace(/([,;\\])/g, "\\$1");
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Workshop app//EN",
+    "BEGIN:VEVENT",
+    `UID:${date}-${time}-${Math.random().toString(36).slice(2)}@workshop`,
+    `DTSTART;TZID=Asia/Singapore:${start}`,
+    `DTEND;TZID=Asia/Singapore:${end}`,
+    `SUMMARY:${escape(title)}`,
+    `LOCATION:${escape(location)}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+  return `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
 }

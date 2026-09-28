@@ -10,6 +10,50 @@ export function bookingStatus(value: unknown): BookingStatus {
     : "requested";
 }
 
+export type BookingSummary = {
+  id: string;
+  status: BookingStatus;
+  preferredDate: string;
+  preferredTime: string;
+  confirmedDate: string | null;
+  confirmedTime: string | null;
+  serviceNames: string[];
+  total: number;
+  createdAt: string;
+};
+
+/** The customer's booking requests at this workshop, newest first. */
+export async function fetchBookings(workshopId: string): Promise<BookingSummary[]> {
+  const { data } = await supabase
+    .from("booking_requests")
+    .select("*")
+    .eq("workshop_id", workshopId)
+    .order("created_at", { ascending: false });
+  return ((data ?? []) as Record<string, unknown>[]).map((row) => {
+    const snapshot = Array.isArray(row["price_snapshot"])
+      ? (row["price_snapshot"] as { name?: unknown }[])
+      : [];
+    return {
+      id: String(row["id"]),
+      status: bookingStatus(row["status"]),
+      preferredDate: String(row["preferred_date"]),
+      preferredTime: String(row["preferred_time"]),
+      confirmedDate: typeof row["confirmed_date"] === "string" ? row["confirmed_date"] : null,
+      confirmedTime: typeof row["confirmed_time"] === "string" ? row["confirmed_time"] : null,
+      serviceNames: snapshot.map((item) => String(item.name ?? "Service")),
+      total: Number(row["estimate_total"] ?? 0),
+      createdAt: String(row["created_at"]),
+    };
+  });
+}
+
+/** Still ahead: requested or confirmed, and not in the past. */
+export function isUpcoming(booking: BookingSummary, today: string): boolean {
+  if (booking.status !== "requested" && booking.status !== "confirmed") return false;
+  const date = booking.status === "confirmed" ? booking.confirmedDate : booking.preferredDate;
+  return Boolean(date && date >= today);
+}
+
 export class PricesChangedError extends Error {
   constructor() {
     super("PRICES_CHANGED");
@@ -25,6 +69,7 @@ type SubmitInput = {
   preferredDate: string;
   preferredTime: string;
   idempotencyKey: string;
+  notes: string;
 };
 
 /**
@@ -39,12 +84,14 @@ export async function submitBookingRequest(input: SubmitInput): Promise<string> 
   const shownTotalCents = Math.round(input.shownTotal * 100);
 
   // Not in the generated types until Lovable regenerates them after 0002.
-  const rpc = supabase.rpc as unknown as (
-    fn: string,
-    args: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { code?: string; message: string } | null }>;
+  // Called through the client (not detached) so it keeps its `this`.
+  const rpc = (fn: string, args: Record<string, unknown>) =>
+    supabase.rpc(fn as never, args as never) as unknown as Promise<{
+      data: unknown;
+      error: { code?: string; message: string } | null;
+    }>;
 
-  const { data, error } = await rpc("submit_booking_request", {
+  const args = {
     _workshop_id: input.workshopId,
     _customer_id: input.customerId,
     _vehicle_id: input.vehicleId,
@@ -53,7 +100,13 @@ export async function submitBookingRequest(input: SubmitInput): Promise<string> 
     _preferred_date: input.preferredDate,
     _preferred_time: input.preferredTime,
     _idempotency_key: input.idempotencyKey,
-  });
+  };
+  // With notes needs migration 0003; without, 0002. PGRST202 means that
+  // version of the function doesn't exist yet, so step down a version.
+  let { data, error } = await rpc("submit_booking_request", { ...args, _notes: input.notes });
+  if (error?.code === "PGRST202") {
+    ({ data, error } = await rpc("submit_booking_request", args));
+  }
 
   if (!error && typeof data === "string") return data;
   if (error?.message.includes("PRICES_CHANGED")) throw new PricesChangedError();
