@@ -3,7 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { km, money, shortDate } from "@/lib/format";
 import type { Job } from "@/lib/customer";
-import { Card, Loading, Page, Pill, TaxNote, TopBar, useWorkshop } from "@/components/app/workshop-ui";
+import {
+  Card,
+  Loading,
+  Page,
+  Pill,
+  TaxNote,
+  TopBar,
+  useWorkshop,
+} from "@/components/app/workshop-ui";
 
 export const Route = createFileRoute("/$slug/invoice/$jobId")({
   head: () => ({
@@ -31,8 +39,7 @@ function Invoice() {
         .eq("workshop_id", workshop.id)
         .maybeSingle();
       return job as unknown as
-        | (Job & { vehicles: { plate: string; make: string; model: string } | null })
-        | null;
+        (Job & { vehicles: { plate: string; make: string; model: string } | null }) | null;
     },
   });
 
@@ -41,7 +48,7 @@ function Invoice() {
   if (!data) {
     return (
       <>
-        <TopBar backTo={{ to: "/$slug/car", params: { slug } }} />
+        <TopBar backTo={{ to: "/$slug/home", params: { slug } }} />
         <Page>
           <Card>
             <p className="text-sm text-muted-foreground">We can't find that invoice.</p>
@@ -55,7 +62,7 @@ function Invoice() {
 
   return (
     <>
-      <TopBar backTo={{ to: "/$slug/car", params: { slug } }} />
+      <TopBar backTo={{ to: "/$slug/home", params: { slug } }} />
       <Page>
         <Card>
           <div className="flex items-start justify-between gap-3">

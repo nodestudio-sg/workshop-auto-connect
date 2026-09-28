@@ -21,7 +21,7 @@ export function TopBar({
   backTo,
   showSignOut = false,
 }: {
-  backTo?: { to: "/$slug/car"; params: { slug: string } };
+  backTo?: { to: "/$slug/home" | "/$slug/car" | "/$slug/bookings"; params: { slug: string } };
   showSignOut?: boolean;
 }) {
   const workshop = useWorkshop();

@@ -50,7 +50,7 @@
 }
 
 :root {
-  --radius: 0.5rem;
+  --radius: 0.875rem;
 
   --background: oklch(0.974 0.005 247.9);
   --foreground: oklch(0.334 0.019 233.4);
@@ -108,4 +108,15 @@
   background-color: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.04),
+    0 6px 16px -8px rgb(15 23 42 / 0.08);
+}
+
+/* Brand-tinted hero behind the header on the sign-in and home screens. */
+@utility brand-hero {
+  background:
+    radial-gradient(120% 80% at 100% 0%, color-mix(in oklab, white 18%, transparent), transparent 60%),
+    linear-gradient(160deg, var(--brand), color-mix(in oklab, var(--brand) 72%, black));
+  color: var(--brand-foreground);
 }

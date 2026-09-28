@@ -75,6 +75,59 @@ export async function fetchVehicle(customerId: string): Promise<Vehicle | null> 
   return (data as unknown as Vehicle) ?? null;
 }
 
+/** All of the customer's cars at this workshop, oldest first. */
+export async function fetchVehicles(customerId: string): Promise<Vehicle[]> {
+  const { data } = await supabase
+    .from("vehicles")
+    .select("*")
+    .eq("customer_id", customerId)
+    .order("created_at", { ascending: true });
+  return (data ?? []) as unknown as Vehicle[];
+}
+
+export class VehicleError extends Error {
+  constructor(
+    readonly reason:
+      "plate-taken" | "invalid-plate" | "invalid" | "too-many" | "unavailable" | "failed",
+  ) {
+    super(reason);
+  }
+}
+
+/** Adds a car to the signed-in customer's record at this workshop. */
+export async function addVehicle(input: {
+  workshopId: string;
+  plate: string;
+  make: string;
+  model: string;
+  year: number;
+  mileageKm: number | null;
+}): Promise<string> {
+  // Not in the generated types until Lovable regenerates them after 0003.
+  // Called through the client (not detached) so it keeps its `this`.
+  const rpc = (fn: string, args: Record<string, unknown>) =>
+    supabase.rpc(fn as never, args as never) as unknown as Promise<{
+      data: unknown;
+      error: { code?: string; message: string } | null;
+    }>;
+  const { data, error } = await rpc("add_vehicle", {
+    _workshop_id: input.workshopId,
+    _plate: input.plate,
+    _make: input.make,
+    _model: input.model,
+    _year: input.year,
+    _mileage_km: input.mileageKm,
+  });
+  if (!error && typeof data === "string") return data;
+  const message = error?.message ?? "";
+  if (error?.code === "PGRST202") throw new VehicleError("unavailable");
+  if (message.includes("PLATE_TAKEN")) throw new VehicleError("plate-taken");
+  if (message.includes("INVALID_PLATE")) throw new VehicleError("invalid-plate");
+  if (message.includes("TOO_MANY_VEHICLES")) throw new VehicleError("too-many");
+  if (message.includes("INVALID_VEHICLE")) throw new VehicleError("invalid");
+  throw new VehicleError("failed");
+}
+
 export async function fetchJobs(vehicleId: string): Promise<Job[]> {
   const { data } = await supabase
     .from("jobs")

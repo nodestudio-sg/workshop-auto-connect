@@ -58,7 +58,7 @@ function Today() {
   if (!jobQuery.isLoading && !job) {
     return (
       <>
-        <TopBar backTo={{ to: "/$slug/car", params: { slug } }} />
+        <TopBar backTo={{ to: "/$slug/home", params: { slug } }} />
         <Page>
           <Card>
             <h1 className="text-base font-semibold">Your car isn't in the workshop today</h1>
@@ -99,7 +99,7 @@ function Today() {
 
   return (
     <>
-      <TopBar backTo={{ to: "/$slug/car", params: { slug } }} />
+      <TopBar backTo={{ to: "/$slug/home", params: { slug } }} />
       <Page>
         <div>
           <h1 className="text-lg font-bold">My car today</h1>

@@ -55,6 +55,77 @@ export async function verifyCode(
   }
 }
 
+/** Signed in, but this account has no customer record at this workshop. */
+export class NotACustomerError extends Error {
+  constructor() {
+    super("NOT_A_CUSTOMER");
+  }
+}
+
+/**
+ * Email + password sign-in, for customers who added a password in Account
+ * after first signing in with their mobile. The account is linked to this
+ * workshop's customer record only through its SMS-verified phone number, so a
+ * new email address can never claim a customer.
+ */
+export async function signInWithEmail(slug: string, email: string, password: string) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email.trim(),
+    password,
+  });
+  if (error) throw error;
+
+  const linked = await supabase
+    .from("customers")
+    .select("id, workshops!inner(slug)")
+    .eq("workshops.slug", slug)
+    .maybeSingle();
+  if (linked.data) return;
+
+  const phone = (data.user?.phone ?? "").replace(/\D/g, "");
+  if (/^65\d{8}$/.test(phone)) {
+    const { error: linkError } = await supabase.rpc("link_customer", {
+      _slug: slug,
+      _mobile: phone.slice(2),
+    });
+    if (!linkError) return;
+  }
+
+  await supabase.auth.signOut();
+  throw new NotACustomerError();
+}
+
+/** Demo accounts use made-up emails; changing them would break the demo sign-in. */
+export function isDemoAccountEmail(email: string | null | undefined): boolean {
+  return Boolean(email?.endsWith("@customer.workshopapp.sg"));
+}
+
+/**
+ * Adds (or changes) the email and password on the signed-in account.
+ * Returns true when the new email still needs confirming from the inbox.
+ */
+export async function setEmailAndPassword(email: string, password: string): Promise<boolean> {
+  const { data: current } = await supabase.auth.getUser();
+  const newEmail = email.trim();
+  const { data, error } = await supabase.auth.updateUser(
+    current.user?.email === newEmail ? { password } : { email: newEmail, password },
+  );
+  if (error) throw error;
+  return Boolean(data.user?.new_email);
+}
+
+export async function requestPasswordReset(slug: string, email: string) {
+  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+    redirectTo: `${window.location.origin}/${slug}/reset-password`,
+  });
+  if (error) throw error;
+}
+
+export async function updatePassword(password: string) {
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) throw error;
+}
+
 export async function signOut() {
   await supabase.auth.signOut();
 }

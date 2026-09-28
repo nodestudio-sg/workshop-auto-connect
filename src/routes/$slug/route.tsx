@@ -47,7 +47,14 @@ function WorkshopLayout() {
   return (
     <div
       className="min-h-[100dvh] bg-background"
-      style={{ "--brand": workshop.brand_color } as React.CSSProperties}
+      style={
+        {
+          "--brand": workshop.brand_color,
+          // Re-derived here: variables built from --brand on :root resolve
+          // with the default colour, not this workshop's.
+          "--brand-soft": `color-mix(in oklab, ${workshop.brand_color} 10%, white)`,
+        } as React.CSSProperties
+      }
     >
       <Outlet />
     </div>
