@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { useCustomer } from "@/hooks/use-customer";
+import { PricesChangedError, submitBookingRequest } from "@/lib/booking";
 import { fetchServices, fetchSlots, type Service } from "@/lib/customer";
 import { dayLabel, money } from "@/lib/format";
 import {
@@ -18,7 +18,6 @@ import {
   useWorkshop,
 } from "@/components/app/workshop-ui";
 import { cn } from "@/lib/utils";
-
 
 export const Route = createFileRoute("/$slug/book")({
   head: () => ({
@@ -63,6 +62,15 @@ function BookService() {
   const total = chosen.reduce((sum, service) => sum + service.price, 0);
   const hasQuoteItem = chosen.some((service) => service.quote_after_inspection);
 
+  // One key per distinct submission: a retry of the same choices reuses it, so
+  // a lost response can't create a duplicate request. Changing the choices
+  // makes it a new submission.
+  const idempotencyKey = useRef(crypto.randomUUID());
+  const selectionKey = `${[...selected].sort().join(",")}|${date}|${time}`;
+  useEffect(() => {
+    idempotencyKey.current = crypto.randomUUID();
+  }, [selectionKey]);
+
   const dates = useMemo(() => {
     const byDate = new Map<string, { time: string; available: boolean }[]>();
     for (const slot of slotsQuery.data ?? []) {
@@ -81,33 +89,29 @@ function BookService() {
   async function submit() {
     if (!date || !time || !vehicle || chosen.length === 0) return;
     setBusy(true);
-    const { data: inserted, error } = await supabase
-      .from("booking_requests")
-      .insert({
-        workshop_id: workshop.id,
-        customer_id: data!.customer.id,
-        vehicle_id: vehicle.id,
-        service_ids: chosen.map((service) => service.id),
-        price_snapshot: chosen.map((service) => ({
-          name: service.name,
-          price: service.price,
-          quote_after_inspection: service.quote_after_inspection,
-          components: service.components,
-        })),
-        estimate_total: total,
-        preferred_date: date,
-        preferred_time: time,
-        status: "requested",
-      })
-      .select("id")
-      .single();
-
-    if (error || !inserted) {
+    try {
+      const id = await submitBookingRequest({
+        workshopId: workshop.id,
+        customerId: data!.customer.id,
+        vehicleId: vehicle.id,
+        services: chosen,
+        shownTotal: total,
+        preferredDate: date,
+        preferredTime: time,
+        idempotencyKey: idempotencyKey.current,
+      });
+      navigate({ to: "/$slug/requested", params: { slug }, search: { id } });
+    } catch (error) {
       setBusy(false);
-      toast.error("We couldn't send your request. Please try again.");
-      return;
+      if (error instanceof PricesChangedError) {
+        await servicesQuery.refetch();
+        toast.error(
+          "Prices have changed since you opened this page. Please check them and send again.",
+        );
+      } else {
+        toast.error("We couldn't send your request. Please try again.");
+      }
     }
-    navigate({ to: "/$slug/requested", params: { slug }, search: { id: inserted.id } });
   }
 
   const canSubmit = chosen.length > 0 && Boolean(date) && Boolean(time) && !busy;
@@ -187,7 +191,8 @@ function BookService() {
                     time === slot.time
                       ? "border-brand bg-brand text-brand-foreground"
                       : "border-border bg-card",
-                    !slot.available && "cursor-not-allowed bg-muted text-muted-foreground/60 line-through",
+                    !slot.available &&
+                      "cursor-not-allowed bg-muted text-muted-foreground/60 line-through",
                   )}
                 >
                   {slot.time}
@@ -222,7 +227,9 @@ function BookService() {
               <p className="text-lg font-bold">{money(total)}</p>
               <TaxNote taxRate={Number(workshop.tax_rate)} />
               {hasQuoteItem ? (
-                <p className="text-xs text-muted-foreground">Some work is quoted after inspection</p>
+                <p className="text-xs text-muted-foreground">
+                  Some work is quoted after inspection
+                </p>
               ) : null}
             </div>
           </div>

@@ -15,6 +15,13 @@
       "when": 1790529000000,
       "tag": "0001_harden_data_boundary",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790560000000,
+      "tag": "0002_booking_snapshot_and_states",
+      "breakpoints": true
     }
   ]
 }
