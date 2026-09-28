@@ -22,10 +22,10 @@ export function WorkshopLogo({
       <img
         src={workshop.logo_url}
         alt={`${workshop.name} logo`}
-        width={size}
+        width={Math.round(size * 1.7)}
         height={size}
-        style={{ width: size, height: size }}
-        className={cn("shrink-0 rounded-sm border border-border bg-card object-cover", className)}
+        style={{ width: size * 1.7, height: size }}
+        className={cn("shrink-0 rounded-sm border border-border bg-card object-contain", className)}
       />
     );
   }

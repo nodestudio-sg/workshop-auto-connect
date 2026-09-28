@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, notFound, Link } from "@tanstack/react-router";
 import { getWorkshopBySlug } from "@/lib/workshop.functions";
+import sgCarServicesIcon from "@/assets/sg-car-services-icon.png.asset.json";
 
 export const Route = createFileRoute("/$slug")({
   loader: async ({ params }) => {
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/$slug")({
     if (!workshop) {
       return { meta: [{ title: "Workshop not found" }, { name: "robots", content: "noindex" }] };
     }
+    const appIcon = workshop.slug === "sgcarservices" ? sgCarServicesIcon.url : workshop.logo_url;
     return {
       meta: [
         { title: workshop.name },
@@ -33,10 +35,10 @@ export const Route = createFileRoute("/$slug")({
         { rel: "manifest", href: `/${params.slug}/manifest.webmanifest` },
         // iOS needs a PNG for the home-screen icon; without a logo it uses a
         // snapshot of the page, which is better than another workshop's logo.
-        ...(workshop.logo_url
+        ...(appIcon
           ? [
-              { rel: "apple-touch-icon", href: workshop.logo_url },
-              { rel: "icon", type: "image/png", href: workshop.logo_url },
+              { rel: "apple-touch-icon", href: appIcon },
+              { rel: "icon", type: "image/png", href: appIcon },
             ]
           : [{ rel: "icon", type: "image/svg+xml", href: `/${params.slug}/icon.svg` }]),
       ],
