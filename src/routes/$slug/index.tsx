@@ -38,7 +38,7 @@ export const Route = createFileRoute("/$slug/")({
 });
 
 const inputClass =
-  "min-h-[52px] w-full rounded-lg border border-input bg-card px-3 text-base outline-none focus:border-brand";
+  "min-h-[52px] w-full rounded-md border border-input bg-card px-4 text-base outline-none transition-colors focus:border-brand-strong";
 
 function SignInScreen() {
   const { slug } = Route.useParams();
@@ -68,17 +68,23 @@ function SignInScreen() {
   const goHome = () => navigate({ to: "/$slug/home", params: { slug } });
 
   return (
-    <div className="flex min-h-[100dvh] flex-col">
-      <div className="brand-hero px-5 pb-24 pt-14">
-        <div className="mx-auto flex max-w-[420px] flex-col items-center text-center">
-          <WorkshopLogo workshop={workshop} size={96} className="shadow-lg ring-4 ring-white/25" />
-          <h1 className="mt-5 text-2xl font-bold tracking-tight">{workshop.name}</h1>
-          <p className="mt-1 text-sm opacity-85">Your car, service history and bookings</p>
+    <div className="flex min-h-[100dvh] flex-col px-5">
+      <div className="mx-auto w-full max-w-[380px] border-b-2 border-brand-strong pb-8 pt-12">
+        <div className="flex items-center gap-4">
+          <WorkshopLogo workshop={workshop} size={52} />
+          <div className="min-w-0">
+            <h1 className="truncate text-xl">{workshop.name}</h1>
+            <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+              Customer service portal
+            </p>
+          </div>
         </div>
       </div>
 
-      <main className="mx-auto -mt-14 w-full max-w-[420px] flex-1 px-4 pb-10">
-        <div className="app-card p-5">
+      <main className="mx-auto w-full max-w-[380px] flex-1 pb-10 pt-8">
+        <div className="app-card overflow-hidden">
+          <div className="p-6">
+          <h2 className="mb-5 text-lg">Sign in</h2>
           {demo ? (
             <div className="mb-4">
               <Pill>Demo sign-in</Pill>
@@ -88,7 +94,7 @@ function SignInScreen() {
           <div
             role="tablist"
             aria-label="Sign-in method"
-            className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1"
+            className="grid grid-cols-2 border-b border-border"
           >
             <MethodTab
               active={method === "mobile"}
@@ -104,27 +110,28 @@ function SignInScreen() {
             />
           </div>
 
-          <div className="mt-5">
+          <div className="mt-6">
             {method === "mobile" ? (
               <MobileSignIn slug={slug} demo={demo} demoPending={demoPending} onDone={goHome} />
             ) : (
               <EmailSignIn slug={slug} workshopName={workshop.name} onDone={goHome} />
             )}
           </div>
+          </div>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-6">
           <InstallHint slug={slug} workshopName={workshop.name} />
         </div>
 
-        <div className="mt-8 space-y-2 text-center text-xs text-muted-foreground">
+        <div className="mt-8 space-y-1 border-t border-border pt-5 text-center text-xs text-muted-foreground">
           <p className="flex items-start justify-center gap-1.5 leading-relaxed">
             <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             {workshop.address}
           </p>
           <a
             href={phoneLinks(workshop.phone).tel}
-            className="inline-flex min-h-[44px] items-center gap-1.5 font-medium text-brand"
+             className="inline-flex min-h-[44px] items-center gap-1.5 font-medium text-brand-strong"
           >
             <Phone className="h-3.5 w-3.5" />
             {workshop.phone}
@@ -153,8 +160,8 @@ function MethodTab({
       aria-selected={active}
       onClick={onClick}
       className={cn(
-        "flex min-h-[44px] items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors",
-        active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground",
+        "flex min-h-[44px] items-center justify-center gap-2 border-b-2 text-sm font-semibold transition-colors",
+        active ? "border-brand-strong text-foreground" : "border-transparent text-muted-foreground",
       )}
     >
       <Icon className="h-4 w-4" />
@@ -214,10 +221,10 @@ function MobileSignIn({
           if (mobileValid && !busy && !demoPending) void sendCode();
         }}
       >
-        <label htmlFor="mobile" className="text-sm font-medium">
+        <label htmlFor="mobile" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Mobile number
         </label>
-        <div className="mt-2 flex items-center gap-2 rounded-lg border border-input bg-card px-3 focus-within:border-brand">
+        <div className="mt-2 flex items-center gap-2 rounded-md border border-input bg-card px-4 focus-within:border-brand-strong">
           <span className="text-base text-muted-foreground">+65</span>
           <input
             id="mobile"

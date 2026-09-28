@@ -50,9 +50,10 @@ function WorkshopLayout() {
       style={
         {
           "--brand": workshop.brand_color,
+          "--brand-strong": `color-mix(in oklab, ${workshop.brand_color} 48%, black)`,
           // Re-derived here: variables built from --brand on :root resolve
           // with the default colour, not this workshop's.
-          "--brand-soft": `color-mix(in oklab, ${workshop.brand_color} 10%, white)`,
+          "--brand-soft": `color-mix(in oklab, ${workshop.brand_color} 7%, var(--card))`,
         } as React.CSSProperties
       }
     >

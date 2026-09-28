@@ -96,26 +96,26 @@ function Home() {
 
   return (
     <>
-      <div className="brand-hero pb-20">
-        <header className="mx-auto flex w-full max-w-[420px] items-center gap-3 px-5 pb-2 pt-6">
-          <WorkshopLogo workshop={workshop} size={44} className="ring-2 ring-white/30" />
+      <div className="brand-hero">
+        <header className="mx-auto flex min-h-[104px] w-full max-w-[420px] items-center gap-3 px-5 py-5">
+          <WorkshopLogo workshop={workshop} size={40} />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-medium opacity-80">{workshop.name}</p>
-            <p className="truncate text-xl font-bold">
+            <p className="truncate text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{workshop.name}</p>
+            <h1 className="mt-1 truncate text-xl">
               {greeting()}, {firstName}
-            </p>
+            </h1>
           </div>
           <Link
             to="/$slug/account"
             params={{ slug }}
             aria-label="Account"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/15 text-base font-bold"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-card text-sm font-semibold"
           >
             {firstName?.[0]?.toUpperCase() ?? "?"}
           </Link>
         </header>
         {data.vehicles.length > 0 ? (
-          <div className="mx-auto w-full max-w-[420px] px-5 pt-3">
+          <div className="mx-auto w-full max-w-[420px] px-5 pb-5">
             <VehicleSwitcher
               slug={slug}
               vehicles={data.vehicles}
@@ -127,7 +127,7 @@ function Home() {
         ) : null}
       </div>
 
-      <main className="mx-auto -mt-16 w-full max-w-[420px] space-y-4 px-4 pb-28">
+      <main className="mx-auto w-full max-w-[420px] space-y-5 px-5 pb-28 pt-5">
         {vehicle ? (
           <Link
             to="/$slug/car"
@@ -145,7 +145,7 @@ function Home() {
               </div>
               <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />
             </div>
-            <CarIllustration className="mx-auto mt-2 h-20 w-auto" />
+            <CarIllustration className="mx-auto mt-4 h-14 w-auto opacity-60 grayscale" />
             <div className="mt-3 grid grid-cols-2 gap-2">
               <Stat icon={Gauge} label="Mileage" value={km(vehicle.mileage_km)} />
               <Stat
@@ -176,8 +176,8 @@ function Home() {
 
         {vehicle ? <NextService vehicle={vehicle} history={history} today={today} /> : null}
 
-        <section aria-label="Quick actions" className="app-card p-3">
-          <div className="grid grid-cols-4 gap-1">
+        <section aria-label="Quick actions" className="border-y border-border py-3">
+          <div className="grid grid-cols-4 gap-y-2">
             <Action to="book" slug={slug} icon={CalendarPlus} label="Book service" primary />
             <Action to="today" slug={slug} icon={Wrench} label="Track repair" />
             <Action to="car" slug={slug} icon={History} label="History" />
@@ -267,8 +267,8 @@ function Home() {
 
 function Stat({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
-      <Icon className="h-4 w-4 shrink-0 text-brand" />
+    <div className="flex items-center gap-2 border-l-2 border-brand-strong bg-muted/60 px-3 py-2">
+      <Icon className="h-4 w-4 shrink-0 text-brand-strong" />
       <div className="min-w-0">
         <p className="text-[11px] text-muted-foreground">{label}</p>
         <p className="truncate text-sm font-semibold">{value}</p>
@@ -292,7 +292,7 @@ function IconBubble({
   return (
     <span
       className={cn(
-        "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+        "flex h-10 w-10 shrink-0 items-center justify-center rounded-md",
         tones[tone],
       )}
     >

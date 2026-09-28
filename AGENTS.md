@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Use the Paper & Ink visual system with Libre Baskerville headings, IBM Plex Sans body text, compact radii, flat bordered surfaces, and workshop colours only as restrained functional accents; this keeps the customer app premium while preserving white-label identity.
