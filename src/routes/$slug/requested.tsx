@@ -68,18 +68,43 @@ function RequestSent() {
   const { data, isLoading } = useQuery({
     queryKey: ["booking", workshop.id, id],
     queryFn: async () => {
-      const { data: row } = await supabase
+      const { data: row, error } = await supabase
         .from("booking_requests")
-        .select("*, vehicles(plate, make, model)")
+        .select("*, vehicles!booking_requests_vehicle_id_fkey(plate, make, model)")
         .eq("id", id)
         .eq("workshop_id", workshop.id)
         .maybeSingle();
+      // Throw rather than return nothing, so a failed load is retried and
+      // never shown as a status the booking doesn't have.
+      if (error) throw error;
       return row;
     },
     enabled: Boolean(id),
   });
 
   if (isLoading) return <Loading />;
+
+  if (!data) {
+    return (
+      <>
+        <TopBar backTo={{ to: "/$slug/bookings", params: { slug } }} />
+        <Page>
+          <Card>
+            <p className="text-sm text-muted-foreground">
+              We couldn't load this booking. Please check your connection and try again.
+            </p>
+          </Card>
+          <Link
+            to="/$slug/bookings"
+            params={{ slug }}
+            className="flex min-h-[52px] w-full items-center justify-center rounded-md border border-border bg-card text-[15px] font-semibold"
+          >
+            See all bookings
+          </Link>
+        </Page>
+      </>
+    );
+  }
 
   const snapshot = (data?.price_snapshot ?? []) as unknown as Snapshot[];
   const total = Number(data?.estimate_total ?? 0);

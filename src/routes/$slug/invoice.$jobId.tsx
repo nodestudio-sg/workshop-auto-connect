@@ -32,12 +32,13 @@ function Invoice() {
   const { data, isLoading } = useQuery({
     queryKey: ["invoice", workshop.id, jobId],
     queryFn: async () => {
-      const { data: job } = await supabase
+      const { data: job, error } = await supabase
         .from("jobs")
-        .select("*, vehicles(plate, make, model)")
+        .select("*, vehicles!jobs_vehicle_id_fkey(plate, make, model)")
         .eq("id", jobId)
         .eq("workshop_id", workshop.id)
         .maybeSingle();
+      if (error) throw error;
       return job as unknown as
         (Job & { vehicles: { plate: string; make: string; model: string } | null }) | null;
     },
