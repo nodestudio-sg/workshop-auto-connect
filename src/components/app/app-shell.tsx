@@ -56,7 +56,7 @@ export function NumberPlate({ plate, className }: { plate: string; className?: s
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-sm border border-foreground/30 bg-card px-3 py-1 font-mono text-lg font-semibold tracking-[0.12em] text-foreground",
+        "inline-flex items-center rounded-lg border border-foreground/30 bg-card px-3 py-1 font-mono text-lg font-semibold tracking-[0.12em] text-foreground shadow-sm",
         className,
       )}
     >

@@ -35,7 +35,7 @@ export function TopBar({
             to={backTo.to}
             params={backTo.params}
             aria-label="Go back"
-            className="-ml-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted"
+            className="-ml-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted"
           >
             <ChevronLeft className="h-6 w-6" />
           </Link>
@@ -59,7 +59,7 @@ export function TopBar({
               await signOut();
               navigate({ to: "/$slug", params: { slug: workshop.slug } });
             }}
-            className="-mr-3 ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted"
+            className="-mr-3 ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted"
           >
             <LogOut className="h-5 w-5" />
           </button>
