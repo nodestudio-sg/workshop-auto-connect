@@ -300,6 +300,7 @@ export type Database = {
           oil_filter: string | null
           oil_grade: string | null
           oil_litres: number | null
+          photo_url: string | null
           plate: string
           workshop_id: string
           year: number
@@ -316,6 +317,7 @@ export type Database = {
           oil_filter?: string | null
           oil_grade?: string | null
           oil_litres?: number | null
+          photo_url?: string | null
           plate: string
           workshop_id: string
           year: number
@@ -332,6 +334,7 @@ export type Database = {
           oil_filter?: string | null
           oil_grade?: string | null
           oil_litres?: number | null
+          photo_url?: string | null
           plate?: string
           workshop_id?: string
           year?: number
@@ -485,6 +488,10 @@ export type Database = {
       link_customer: {
         Args: { _mobile: string; _slug: string }
         Returns: string
+      }
+      set_vehicle_photo: {
+        Args: { _photo_url: string; _vehicle_id: string }
+        Returns: undefined
       }
       submit_booking_request:
         | {
