@@ -60,8 +60,8 @@ export function VehiclePhoto({
   const custom = vehicle.photo_url ? signed.data : null;
 
   async function upload(file: File) {
-    if (!file.type.startsWith("image/")) return toast.error("Please choose a photo.");
-    if (file.size > 8 * 1024 * 1024) return toast.error("Photo must be under 8 MB.");
+    if (!file.type.startsWith("image/")) { toast.error("Please choose a photo."); return; }
+    if (file.size > 8 * 1024 * 1024) { toast.error("Photo must be under 8 MB."); return; }
     setBusy(true);
     try {
       const { data: auth } = await supabase.auth.getUser();
