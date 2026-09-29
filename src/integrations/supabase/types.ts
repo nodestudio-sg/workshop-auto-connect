@@ -128,7 +128,9 @@ export type Database = {
       }
       customers: {
         Row: {
+          company_name: string | null
           created_at: string
+          email: string | null
           id: string
           mobile: string
           name: string
@@ -136,7 +138,9 @@ export type Database = {
           workshop_id: string
         }
         Insert: {
+          company_name?: string | null
           created_at?: string
+          email?: string | null
           id?: string
           mobile: string
           name: string
@@ -144,7 +148,9 @@ export type Database = {
           workshop_id: string
         }
         Update: {
+          company_name?: string | null
           created_at?: string
+          email?: string | null
           id?: string
           mobile?: string
           name?: string
@@ -389,37 +395,55 @@ export type Database = {
       workshops: {
         Row: {
           address: string
+          booking_window_days: number
           brand_color: string
           created_at: string
           demo_mode: boolean
+          icon_url: string | null
           id: string
           logo_url: string | null
+          min_notice_hours: number
           name: string
+          open_days: number[]
           phone: string
+          slot_capacity: number
+          slot_times: string[]
           slug: string
           tax_rate: number
         }
         Insert: {
           address: string
+          booking_window_days?: number
           brand_color?: string
           created_at?: string
           demo_mode?: boolean
+          icon_url?: string | null
           id?: string
           logo_url?: string | null
+          min_notice_hours?: number
           name: string
+          open_days?: number[]
           phone: string
+          slot_capacity?: number
+          slot_times?: string[]
           slug: string
           tax_rate?: number
         }
         Update: {
           address?: string
+          booking_window_days?: number
           brand_color?: string
           created_at?: string
           demo_mode?: boolean
+          icon_url?: string | null
           id?: string
           logo_url?: string | null
+          min_notice_hours?: number
           name?: string
+          open_days?: number[]
           phone?: string
+          slot_capacity?: number
+          slot_times?: string[]
           slug?: string
           tax_rate?: number
         }
@@ -442,6 +466,22 @@ export type Database = {
         Returns: string
       }
       approve_extra_work: { Args: { _job_id: string }; Returns: undefined }
+      available_slots: {
+        Args: { _workshop_id: string }
+        Returns: {
+          available: boolean
+          slot_date: string
+          slot_time: string
+        }[]
+      }
+      booking_slot_state: {
+        Args: { _date: string; _time: string; _workshop_id: string }
+        Returns: string
+      }
+      cancel_booking_request: {
+        Args: { _booking_id: string }
+        Returns: undefined
+      }
       link_customer: {
         Args: { _mobile: string; _slug: string }
         Returns: string
@@ -474,6 +514,15 @@ export type Database = {
             }
             Returns: string
           }
+      update_my_profile: {
+        Args: {
+          _company: string
+          _email: string
+          _name: string
+          _workshop_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
