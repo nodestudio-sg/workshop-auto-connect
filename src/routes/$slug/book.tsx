@@ -155,7 +155,7 @@ function BookService() {
   return (
     <>
       <TopBar backTo={{ to: "/$slug/home", params: { slug } }} />
-      <main className="mx-auto w-full max-w-[420px] space-y-6 px-4 pb-48 pt-4">
+      <main className="mx-auto w-full max-w-[420px] space-y-6 px-4 pb-48 pt-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Book a service</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -250,10 +250,10 @@ function BookService() {
                     setTime(null);
                   }}
                   className={cn(
-                    "flex min-h-[76px] w-16 shrink-0 flex-col items-center justify-center rounded-md border text-sm transition-colors",
+                    "flex min-h-[76px] w-16 shrink-0 flex-col items-center justify-center rounded-2xl border text-sm transition-colors",
                     date === value
-                      ? "border-brand bg-brand text-brand-foreground shadow-sm"
-                      : "border-border bg-card",
+                      ? "border-brand bg-brand text-brand-foreground shadow-[0_8px_16px_-6px_color-mix(in_oklab,var(--brand)_55%,transparent)]"
+                      : "border-border bg-card shadow-sm",
                     !anyFree && "opacity-40",
                   )}
                 >
@@ -283,7 +283,7 @@ function BookService() {
                     aria-pressed={time === slot.time}
                     onClick={() => setTime(slot.time)}
                     className={cn(
-                      "min-h-[52px] rounded-md border text-sm font-semibold transition-colors",
+                      "min-h-[52px] rounded-2xl border text-sm font-semibold transition-colors",
                       time === slot.time
                         ? "border-brand bg-brand text-brand-foreground shadow-sm"
                         : "border-border bg-card",
@@ -378,7 +378,7 @@ function Step({
       <div className="mb-3 flex items-center gap-2">
         <span
           className={cn(
-            "flex h-6 w-6 shrink-0 items-center justify-center rounded-sm border text-xs font-bold",
+            "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-bold",
             done
               ? "border-brand-strong bg-brand-strong text-brand-foreground"
               : "border-border bg-card text-muted-foreground",
@@ -420,7 +420,7 @@ function ServiceCard({
       >
         <span
           className={cn(
-            "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md border",
+            "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border",
             checked ? "border-brand bg-brand text-brand-foreground" : "border-border",
           )}
         >

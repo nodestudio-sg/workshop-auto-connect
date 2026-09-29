@@ -43,7 +43,7 @@ export function InstallHint({ slug, workshopName }: { slug: string; workshopName
   }
 
   return (
-    <div className="relative border-y border-border bg-secondary/55 px-4 py-4">
+    <div className="relative rounded-2xl border border-border bg-secondary/55 px-4 py-4">
       <button
         type="button"
         aria-label="Dismiss"

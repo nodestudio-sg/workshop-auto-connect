@@ -38,7 +38,7 @@ export const Route = createFileRoute("/$slug/")({
 });
 
 const inputClass =
-  "min-h-[52px] w-full rounded-md border border-input bg-card px-4 text-base outline-none transition-colors focus:border-brand-strong";
+  "min-h-[52px] w-full rounded-2xl border border-input bg-card px-4 text-base outline-none transition-colors focus:border-brand-strong";
 
 function SignInScreen() {
   const { slug } = Route.useParams();
@@ -69,7 +69,7 @@ function SignInScreen() {
 
   return (
     <div className="flex min-h-[100dvh] flex-col px-5">
-      <div className="mx-auto w-full max-w-[380px] border-b-2 border-brand-strong pb-8 pt-12">
+      <div className="mx-auto w-full max-w-[380px] border-b border-border pb-8 pt-12">
         <div className="flex items-center gap-4">
           <WorkshopLogo workshop={workshop} size={52} />
           <div className="min-w-0">
@@ -241,7 +241,7 @@ function MobileSignIn({
         >
           Mobile number
         </label>
-        <div className="mt-2 flex items-center gap-2 rounded-md border border-input bg-card px-4 focus-within:border-brand-strong">
+        <div className="mt-2 flex items-center gap-2 rounded-2xl border border-input bg-card px-4 focus-within:border-brand-strong">
           <span className="text-base text-muted-foreground">+65</span>
           <input
             id="mobile"
@@ -286,7 +286,7 @@ function MobileSignIn({
         value={code}
         maxLength={6}
         onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
-        className="mt-3 min-h-[56px] w-full rounded-lg border border-input bg-card px-3 text-center text-2xl tracking-[0.4em] outline-none focus:border-brand"
+        className="mt-3 min-h-[56px] w-full rounded-2xl border border-input bg-card px-3 text-center text-2xl tracking-[0.4em] outline-none focus:border-brand"
       />
       <BrandButton type="submit" disabled={!codeValid || busy} className="mt-5">
         {busy ? "Signing in…" : "Sign in"}

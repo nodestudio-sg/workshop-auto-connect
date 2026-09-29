@@ -69,7 +69,7 @@ function Today() {
           <Link
             to="/$slug/book"
             params={{ slug }}
-            className="flex min-h-[52px] items-center justify-center rounded-md border border-border bg-card text-[15px] font-semibold"
+            className="flex min-h-[52px] items-center justify-center rounded-2xl border border-border bg-card text-[15px] font-semibold"
           >
             Book a service
           </Link>
@@ -119,17 +119,23 @@ function Today() {
                   <div className="flex flex-col items-center">
                     <span
                       className={cn(
-                         "flex h-7 w-7 shrink-0 items-center justify-center rounded-sm border text-xs font-bold",
+                         "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-bold ring-4 ring-card",
                         done && "border-brand bg-brand text-brand-foreground",
                         active && "border-attention bg-attention text-attention-foreground",
                         !done && !active && "border-border bg-card text-muted-foreground",
                       )}
                     >
-                      {done ? <Check className="h-4 w-4" /> : index + 1}
+                      {done ? (
+                        <Check className="h-4 w-4" />
+                      ) : active ? (
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-attention-foreground" />
+                      ) : (
+                        index + 1
+                      )}
                     </span>
                     {index < STAGES.length - 1 ? (
                       <span
-                        className={cn("w-px flex-1", done ? "bg-brand" : "bg-border")}
+                        className={cn("w-0.5 flex-1 rounded-full", done ? "bg-brand" : "bg-border")}
                         style={{ minHeight: 28 }}
                       />
                     ) : null}
@@ -172,7 +178,7 @@ function Today() {
                     src={photo}
                     alt="Inspection finding"
                     loading="lazy"
-                    className="aspect-[4/3] w-full rounded-md border border-border object-cover"
+                    className="aspect-[4/3] w-full rounded-2xl border border-border object-cover"
                   />
                 ))}
               </div>
@@ -192,7 +198,7 @@ function Today() {
                 </BrandButton>
                 <a
                   href={`tel:${workshop.phone.replace(/\s/g, "")}`}
-                  className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-md border border-border bg-card text-[15px] font-semibold"
+                  className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card text-[15px] font-semibold"
                 >
                   <Phone className="h-4 w-4" />
                   Ask a question

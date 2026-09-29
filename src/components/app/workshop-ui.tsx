@@ -11,7 +11,7 @@ export function useWorkshop() {
 
 export function Page({ children }: { children: ReactNode }) {
   return (
-    <div className="mx-auto w-full max-w-[420px] px-5 pb-28 pt-5">
+    <div className="mx-auto w-full max-w-[420px] px-5 pb-28 pt-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div className="space-y-5">{children}</div>
     </div>
   );
@@ -35,7 +35,7 @@ export function TopBar({
             to={backTo.to}
             params={backTo.params}
             aria-label="Go back"
-            className="-ml-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted"
+            className="-ml-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted"
           >
             <ChevronLeft className="h-6 w-6" />
           </Link>
@@ -59,7 +59,7 @@ export function TopBar({
               await signOut();
               navigate({ to: "/$slug", params: { slug: workshop.slug } });
             }}
-            className="-mr-3 ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted"
+            className="-mr-3 ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted"
           >
             <LogOut className="h-5 w-5" />
           </button>
@@ -89,7 +89,7 @@ export function Pill({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-sm px-2 py-1 text-[11px] font-semibold uppercase tracking-wide",
+        "inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide",
         tones[tone],
       )}
     >
@@ -117,7 +117,7 @@ export function BrandButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "flex min-h-[52px] w-full items-center justify-center rounded-md bg-brand-strong px-4 text-sm font-semibold text-brand-foreground shadow-sm transition-[opacity,transform] active:translate-y-px disabled:opacity-40",
+        "flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-brand-strong px-4 text-sm font-semibold text-brand-foreground shadow-[0_10px_20px_-8px_color-mix(in_oklab,var(--brand)_55%,transparent)] transition-[opacity,transform] active:scale-[0.98] disabled:opacity-40 disabled:shadow-none",
         className,
       )}
     >

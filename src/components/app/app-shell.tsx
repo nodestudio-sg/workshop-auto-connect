@@ -25,7 +25,7 @@ export function WorkshopLogo({
         width={Math.round(size * 1.7)}
         height={size}
         style={{ width: size * 1.7, height: size }}
-        className={cn("shrink-0 rounded-sm border border-border bg-card object-contain", className)}
+        className={cn("shrink-0 rounded-lg border border-border bg-card object-contain", className)}
       />
     );
   }
@@ -40,7 +40,7 @@ export function WorkshopLogo({
       aria-label={`${workshop.name} logo`}
       style={{ width: size, height: size, fontSize: size * 0.38 }}
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-sm bg-brand-strong font-semibold text-brand-foreground",
+        "flex shrink-0 items-center justify-center rounded-lg bg-brand-strong font-semibold text-brand-foreground",
         className,
       )}
     >
@@ -56,7 +56,7 @@ export function NumberPlate({ plate, className }: { plate: string; className?: s
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-sm border border-foreground/30 bg-card px-3 py-1 font-mono text-lg font-semibold tracking-[0.12em] text-foreground",
+        "inline-flex items-center rounded-lg border border-foreground/30 bg-card px-3 py-1 font-mono text-lg font-semibold tracking-[0.12em] text-foreground shadow-sm",
         className,
       )}
     >
@@ -135,7 +135,7 @@ export function VehicleSwitcher({
             aria-checked={active}
             onClick={() => onSelect(vehicle.id)}
             className={cn(
-               "min-h-[40px] shrink-0 rounded-md border px-4 font-mono text-sm font-semibold tracking-wider",
+               "min-h-[40px] shrink-0 rounded-full border px-4 font-mono text-sm font-semibold tracking-wider transition-colors",
               onBrand
                 ? active
                    ? "border-foreground bg-foreground text-card"
@@ -153,7 +153,7 @@ export function VehicleSwitcher({
         to="/$slug/add-car"
         params={{ slug }}
         className={cn(
-           "flex min-h-[40px] shrink-0 items-center gap-1 rounded-md border border-dashed px-4 text-sm font-semibold",
+           "flex min-h-[40px] shrink-0 items-center gap-1 rounded-full border border-dashed px-4 text-sm font-semibold",
            onBrand ? "border-border bg-card text-foreground" : "border-brand/50 text-brand-strong",
         )}
       >
@@ -193,15 +193,16 @@ export function TabBar({ slug, active }: { slug: string; active: Tab }) {
                   isActive ? "text-brand-strong" : "text-muted-foreground",
                 )}
               >
-                <span
-                  className={cn(
-                    "flex h-7 w-12 items-center justify-center rounded-sm transition-colors",
-                    isActive && "border-b-2 border-brand-strong",
-                  )}
-                >
+                <span className="flex h-7 w-12 items-center justify-center transition-colors">
                   <Icon className="h-5 w-5" strokeWidth={isActive ? 2.4 : 2} />
                 </span>
                 {label}
+                <span
+                  className={cn(
+                    "h-1 w-1 rounded-full transition-colors",
+                    isActive ? "bg-brand-strong" : "bg-transparent",
+                  )}
+                />
               </Link>
             </li>
           );
