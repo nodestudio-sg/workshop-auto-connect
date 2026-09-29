@@ -505,20 +505,20 @@ type ActionProps = { icon: LucideIcon; label: string; primary?: boolean; tone?: 
 );
 
 function Action(props: ActionProps) {
-  const { icon: Icon, label, primary } = props;
+  const { icon: Icon, label, primary, tone = "sky" } = props;
   const body: ReactNode = (
     <>
       <span
         className={cn(
-          "flex h-12 w-12 items-center justify-center rounded-2xl transition-transform active:scale-95",
+          "flex h-14 w-14 items-center justify-center rounded-2xl border shadow-sm transition-transform active:scale-95",
           primary
-            ? "bg-brand-strong text-brand-foreground shadow-[0_8px_16px_-6px_color-mix(in_oklab,var(--brand)_55%,transparent)]"
-            : "border border-border bg-card text-brand-strong shadow-sm",
+            ? "border-transparent bg-brand text-brand-foreground shadow-[0_10px_20px_-8px_color-mix(in_oklab,var(--brand)_60%,transparent)]"
+            : ACTION_TONES[tone],
         )}
       >
-        <Icon className="h-5 w-5" />
+        <Icon className="h-6 w-6" />
       </span>
-      <span className="text-center text-[11px] font-medium leading-tight">{label}</span>
+      <span className="text-center text-[11px] font-bold leading-tight text-muted-foreground">{label}</span>
     </>
   );
   const className =
