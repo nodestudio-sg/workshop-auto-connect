@@ -177,18 +177,19 @@ function Home() {
         <section aria-label="Quick actions" className="py-1">
           <div className="grid grid-cols-4 gap-y-3">
             <Action to="book" slug={slug} icon={CalendarPlus} label="Book service" primary />
-            <Action to="today" slug={slug} icon={Wrench} label="Track repair" />
-            <Action to="car" slug={slug} icon={History} label="History" />
-            <Action to="bookings" slug={slug} icon={CalendarCheck2} label="Bookings" />
-            <Action href={links.tel} icon={Phone} label="Call" />
-            <Action href={links.whatsapp} icon={MessageCircle} label="WhatsApp" external />
+            <Action to="today" slug={slug} icon={Wrench} label="Track repair" tone="emerald" />
+            <Action to="car" slug={slug} icon={History} label="History" tone="amber" />
+            <Action to="bookings" slug={slug} icon={CalendarCheck2} label="Bookings" tone="sky" />
+            <Action href={links.tel} icon={Phone} label="Call" tone="rose" />
+            <Action href={links.whatsapp} icon={MessageCircle} label="WhatsApp" tone="green" external />
             <Action
               href={directionsUrl(workshop.address)}
               icon={MapPin}
               label="Directions"
+              tone="violet"
               external
             />
-            <Action to="car" slug={slug} icon={Receipt} label="Invoices" />
+            <Action to="car" slug={slug} icon={Receipt} label="Invoices" tone="slate" />
           </div>
         </section>
 
@@ -488,7 +489,17 @@ function LastVisit({ slug, job }: { slug: string; job: Job }) {
   );
 }
 
-type ActionProps = { icon: LucideIcon; label: string; primary?: boolean } & (
+const ACTION_TONES = {
+  emerald: "bg-emerald-50 text-emerald-600 border-emerald-100/60",
+  amber: "bg-amber-50 text-amber-600 border-amber-100/60",
+  sky: "bg-sky-50 text-sky-600 border-sky-100/60",
+  rose: "bg-rose-50 text-rose-600 border-rose-100/60",
+  green: "bg-green-50 text-green-600 border-green-100/60",
+  violet: "bg-violet-50 text-violet-600 border-violet-100/60",
+  slate: "bg-[oklch(0.21_0.03_265)] text-white border-transparent",
+} as const;
+
+type ActionProps = { icon: LucideIcon; label: string; primary?: boolean; tone?: keyof typeof ACTION_TONES } & (
   | { to: "book" | "today" | "car" | "bookings"; slug: string; href?: never; external?: never }
   | { href: string; external?: boolean; to?: never; slug?: never }
 );
