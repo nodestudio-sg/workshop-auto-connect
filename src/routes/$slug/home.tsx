@@ -99,7 +99,7 @@ function Home() {
         <header className="mx-auto flex min-h-[104px] w-full max-w-[420px] items-center gap-3 px-5 py-5">
           <WorkshopLogo workshop={workshop} size={40} />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[11px] font-semibold uppercase tracking-wider text-brand-foreground/75">{workshop.name}</p>
+            <p className="truncate text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">{workshop.name}</p>
             <h1 className="mt-1 truncate text-xl">
               {greeting()}, {firstName}
             </h1>
@@ -108,7 +108,7 @@ function Home() {
             to="/$slug/account"
             params={{ slug }}
             aria-label="Account"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-card text-sm font-semibold shadow-sm"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-white/20 bg-white/10 text-sm font-semibold text-white backdrop-blur-md"
           >
             {firstName?.[0]?.toUpperCase() ?? "?"}
           </Link>
@@ -126,30 +126,31 @@ function Home() {
         ) : null}
       </div>
 
-      <main className="mx-auto w-full max-w-[420px] space-y-5 px-5 pb-28 pt-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <main className="relative z-20 mx-auto -mt-8 w-full max-w-[420px] space-y-5 px-5 pb-28 animate-in fade-in slide-in-from-bottom-2 duration-300">
         {vehicle ? (
           <Link
             to="/$slug/car"
             params={{ slug }}
-            className="app-card block overflow-hidden p-4"
+            className="app-card block overflow-hidden rounded-[2rem] p-6 shadow-xl"
             aria-label={`My car, ${vehicle.plate}`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <NumberPlate plate={vehicle.plate} />
-                <p className="mt-2 truncate text-base font-semibold">
+                <p className="mt-3 truncate text-xl font-bold tracking-tight">
                   {vehicle.make} {vehicle.model}
                 </p>
                 <p className="text-xs text-muted-foreground">{vehicle.year}</p>
               </div>
               <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />
             </div>
-            <div className="mt-5 grid grid-cols-2 gap-2 border-t border-border pt-4">
-              <Stat icon={Gauge} label="Mileage" value={km(vehicle.mileage_km)} />
+            <div className="mt-6 grid grid-cols-2 gap-4">
+              <Stat icon={Gauge} label="Mileage" value={km(vehicle.mileage_km)} tone="indigo" />
               <Stat
                 icon={Wrench}
                 label="Engine oil"
                 value={vehicle.oil_grade ? `${vehicle.oil_grade} · ${vehicle.oil_litres} L` : "—"}
+                tone="emerald"
               />
             </div>
           </Link>
@@ -176,18 +177,19 @@ function Home() {
         <section aria-label="Quick actions" className="py-1">
           <div className="grid grid-cols-4 gap-y-3">
             <Action to="book" slug={slug} icon={CalendarPlus} label="Book service" primary />
-            <Action to="today" slug={slug} icon={Wrench} label="Track repair" />
-            <Action to="car" slug={slug} icon={History} label="History" />
-            <Action to="bookings" slug={slug} icon={CalendarCheck2} label="Bookings" />
-            <Action href={links.tel} icon={Phone} label="Call" />
-            <Action href={links.whatsapp} icon={MessageCircle} label="WhatsApp" external />
+            <Action to="today" slug={slug} icon={Wrench} label="Track repair" tone="emerald" />
+            <Action to="car" slug={slug} icon={History} label="History" tone="amber" />
+            <Action to="bookings" slug={slug} icon={CalendarCheck2} label="Bookings" tone="sky" />
+            <Action href={links.tel} icon={Phone} label="Call" tone="rose" />
+            <Action href={links.whatsapp} icon={MessageCircle} label="WhatsApp" tone="green" external />
             <Action
               href={directionsUrl(workshop.address)}
               icon={MapPin}
               label="Directions"
+              tone="violet"
               external
             />
-            <Action to="car" slug={slug} icon={Receipt} label="Invoices" />
+            <Action to="car" slug={slug} icon={Receipt} label="Invoices" tone="slate" />
           </div>
         </section>
 
@@ -262,14 +264,31 @@ function Home() {
   );
 }
 
-function Stat({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
+const STAT_TONES = {
+  indigo: "bg-indigo-100 text-indigo-600",
+  emerald: "bg-emerald-100 text-emerald-600",
+} as const;
+
+function Stat({
+  icon: Icon,
+  label,
+  value,
+  tone = "indigo",
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  tone?: keyof typeof STAT_TONES;
+}) {
   return (
-    <div className="flex items-center gap-2.5 rounded-2xl bg-muted/60 px-3.5 py-2.5">
-      <Icon className="h-4 w-4 shrink-0 text-brand-strong" />
-      <div className="min-w-0">
-        <p className="text-[11px] text-muted-foreground">{label}</p>
-        <p className="truncate text-sm font-semibold">{value}</p>
+    <div className="rounded-2xl border border-border/60 bg-muted/50 p-4">
+      <div className="mb-2 flex items-center gap-2">
+        <span className={cn("flex h-6 w-6 items-center justify-center rounded-lg", STAT_TONES[tone])}>
+          <Icon className="h-3.5 w-3.5" />
+        </span>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
       </div>
+      <p className="truncate text-lg font-bold">{value}</p>
     </div>
   );
 }
@@ -426,7 +445,7 @@ function UpcomingBooking({ slug, booking }: { slug: string; booking: BookingSumm
         <div
           className={cn(
             "flex w-14 shrink-0 flex-col items-center rounded-2xl py-2",
-            confirmed ? "bg-success-soft text-success" : "bg-attention-soft text-attention",
+            confirmed ? "bg-brand text-brand-foreground" : "bg-attention-soft text-attention",
           )}
         >
           <span className="text-[11px] font-semibold uppercase">{label.month}</span>
@@ -470,26 +489,36 @@ function LastVisit({ slug, job }: { slug: string; job: Job }) {
   );
 }
 
-type ActionProps = { icon: LucideIcon; label: string; primary?: boolean } & (
+const ACTION_TONES = {
+  emerald: "bg-emerald-50 text-emerald-600 border-emerald-100/60",
+  amber: "bg-amber-50 text-amber-600 border-amber-100/60",
+  sky: "bg-sky-50 text-sky-600 border-sky-100/60",
+  rose: "bg-rose-50 text-rose-600 border-rose-100/60",
+  green: "bg-green-50 text-green-600 border-green-100/60",
+  violet: "bg-violet-50 text-violet-600 border-violet-100/60",
+  slate: "bg-[oklch(0.21_0.03_265)] text-white border-transparent",
+} as const;
+
+type ActionProps = { icon: LucideIcon; label: string; primary?: boolean; tone?: keyof typeof ACTION_TONES } & (
   | { to: "book" | "today" | "car" | "bookings"; slug: string; href?: never; external?: never }
   | { href: string; external?: boolean; to?: never; slug?: never }
 );
 
 function Action(props: ActionProps) {
-  const { icon: Icon, label, primary } = props;
+  const { icon: Icon, label, primary, tone = "sky" } = props;
   const body: ReactNode = (
     <>
       <span
         className={cn(
-          "flex h-12 w-12 items-center justify-center rounded-2xl transition-transform active:scale-95",
+          "flex h-14 w-14 items-center justify-center rounded-2xl border shadow-sm transition-transform active:scale-95",
           primary
-            ? "bg-brand-strong text-brand-foreground shadow-[0_8px_16px_-6px_color-mix(in_oklab,var(--brand)_55%,transparent)]"
-            : "border border-border bg-card text-brand-strong shadow-sm",
+            ? "border-transparent bg-brand text-brand-foreground shadow-[0_10px_20px_-8px_color-mix(in_oklab,var(--brand)_60%,transparent)]"
+            : ACTION_TONES[tone],
         )}
       >
-        <Icon className="h-5 w-5" />
+        <Icon className="h-6 w-6" />
       </span>
-      <span className="text-center text-[11px] font-medium leading-tight">{label}</span>
+      <span className="text-center text-[11px] font-bold leading-tight text-muted-foreground">{label}</span>
     </>
   );
   const className =

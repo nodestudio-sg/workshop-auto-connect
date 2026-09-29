@@ -20,6 +20,7 @@
   --radius-4xl: calc(var(--radius) + 16px);
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -136,10 +137,12 @@
     0 12px 28px -16px color-mix(in oklab, var(--foreground) 12%, transparent);
 }
 
-/* Brand-tinted hero behind the header on the sign-in and home screens. */
+/* Dark premium hero behind the header on the sign-in and home screens. */
 @utility brand-hero {
-  background: linear-gradient(165deg, var(--brand-strong), var(--brand) 75%);
-  color: var(--brand-foreground);
+  background:
+    radial-gradient(180px 180px at 90% -20%, color-mix(in oklab, var(--brand) 45%, transparent), transparent 70%),
+    linear-gradient(160deg, oklch(0.24 0.03 265), oklch(0.3 0.05 275) 55%, oklch(0.26 0.06 285));
+  color: oklch(0.99 0.003 250);
   border-radius: 0 0 var(--radius-3xl) var(--radius-3xl);
-  box-shadow: 0 16px 32px -20px color-mix(in oklab, var(--brand-strong) 60%, transparent);
+  box-shadow: 0 20px 40px -24px oklch(0.24 0.03 265 / 0.55);
 }
