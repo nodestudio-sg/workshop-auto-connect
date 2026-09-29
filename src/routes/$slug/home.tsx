@@ -126,7 +126,7 @@ function Home() {
         ) : null}
       </div>
 
-      <main className="mx-auto w-full max-w-[420px] space-y-5 px-5 pb-28 pt-5">
+      <main className="mx-auto w-full max-w-[420px] space-y-5 px-5 pb-28 pt-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
         {vehicle ? (
           <Link
             to="/$slug/car"
@@ -173,8 +173,8 @@ function Home() {
 
         {vehicle ? <NextService vehicle={vehicle} history={history} today={today} /> : null}
 
-        <section aria-label="Quick actions" className="border-y border-border py-3">
-          <div className="grid grid-cols-4 gap-y-2">
+        <section aria-label="Quick actions" className="py-1">
+          <div className="grid grid-cols-4 gap-y-3">
             <Action to="book" slug={slug} icon={CalendarPlus} label="Book service" primary />
             <Action to="today" slug={slug} icon={Wrench} label="Track repair" />
             <Action to="car" slug={slug} icon={History} label="History" />
@@ -264,7 +264,7 @@ function Home() {
 
 function Stat({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-2 border-l-2 border-brand-strong bg-muted/60 px-3 py-2">
+    <div className="flex items-center gap-2.5 rounded-2xl bg-muted/60 px-3.5 py-2.5">
       <Icon className="h-4 w-4 shrink-0 text-brand-strong" />
       <div className="min-w-0">
         <p className="text-[11px] text-muted-foreground">{label}</p>
@@ -289,7 +289,7 @@ function IconBubble({
   return (
     <span
       className={cn(
-        "flex h-10 w-10 shrink-0 items-center justify-center rounded-md",
+        "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl",
         tones[tone],
       )}
     >
@@ -481,10 +481,10 @@ function Action(props: ActionProps) {
     <>
       <span
         className={cn(
-          "flex h-11 w-11 items-center justify-center rounded-md border",
+          "flex h-12 w-12 items-center justify-center rounded-2xl transition-transform active:scale-95",
           primary
-            ? "border-brand-strong bg-brand-strong text-brand-foreground"
-            : "border-border bg-card text-brand-strong",
+            ? "bg-brand-strong text-brand-foreground shadow-[0_8px_16px_-6px_color-mix(in_oklab,var(--brand)_55%,transparent)]"
+            : "border border-border bg-card text-brand-strong shadow-sm",
         )}
       >
         <Icon className="h-5 w-5" />
@@ -493,7 +493,7 @@ function Action(props: ActionProps) {
     </>
   );
   const className =
-    "flex min-h-[80px] flex-col items-center justify-start gap-2 rounded-md px-1 py-2 active:bg-muted";
+    "flex min-h-[80px] flex-col items-center justify-start gap-2 rounded-2xl px-1 py-2 active:bg-muted";
 
   if (props.href) {
     return (
