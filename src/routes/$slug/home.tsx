@@ -445,7 +445,7 @@ function UpcomingBooking({ slug, booking }: { slug: string; booking: BookingSumm
         <div
           className={cn(
             "flex w-14 shrink-0 flex-col items-center rounded-2xl py-2",
-            confirmed ? "bg-success-soft text-success" : "bg-attention-soft text-attention",
+            confirmed ? "bg-brand text-brand-foreground" : "bg-attention-soft text-attention",
           )}
         >
           <span className="text-[11px] font-semibold uppercase">{label.month}</span>
