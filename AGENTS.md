@@ -9,4 +9,4 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Use the Paper & Ink visual system with Libre Baskerville headings, IBM Plex Sans body text, compact radii, flat bordered surfaces, and workshop colours only as restrained functional accents; this keeps the customer app premium while preserving white-label identity.
+- Use the "Premium minimal mobile" visual system: Inter for all text, light neutral background, white cards with soft layered shadows, large radii (rounded-2xl/3xl), rounded-full pills, and the workshop brand colour for filled buttons, the header band, and key highlights.
