@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { cleanMobile, requestCode, verifyCode } from "@/lib/auth";
+import { cleanMobile, CodeError, requestCode, verifyCode } from "@/lib/auth";
 import { ProfileError, updateMyProfile } from "@/lib/customer";
 import { isDemoSignInActive } from "@/lib/demo-mode";
 import { BrandButton, Pill, useWorkshop } from "@/components/app/workshop-ui";
@@ -52,11 +52,15 @@ function SignUp() {
   async function sendCode() {
     setBusy(true);
     try {
-      await requestCode(mobile, demo);
+      await requestCode(slug, mobile, demo);
       setCode("");
       setStep("code");
-    } catch {
-      toast.error("We couldn't send a code just now. Please try again in a moment.");
+    } catch (error) {
+      toast.error(
+        error instanceof CodeError
+          ? error.message
+          : "We couldn't send a code just now. Please try again in a moment.",
+      );
     } finally {
       setBusy(false);
     }
@@ -66,8 +70,12 @@ function SignUp() {
     setBusy(true);
     try {
       await verifyCode(slug, mobile, code, demo);
-    } catch {
-      toast.error("That code didn't work, or it has expired. Please try again.");
+    } catch (error) {
+      toast.error(
+        error instanceof CodeError
+          ? error.message
+          : "That code didn't work, or it has expired. Please try again.",
+      );
       setBusy(false);
       return;
     }
@@ -148,7 +156,7 @@ function SignUp() {
                   <p className="mt-1 text-xs text-muted-foreground">
                     {demo
                       ? "Demo: no code is sent. Any 6-digit code works."
-                      : "We'll text you a 6-digit code to confirm it's yours."}
+                      : "We'll WhatsApp you a 6-digit code to confirm it's yours."}
                   </p>
                 )}
               </div>
@@ -171,7 +179,7 @@ function SignUp() {
                 Enter the 6-digit code
               </label>
               <p className="mt-1 text-xs text-muted-foreground">
-                {demo ? `Demo: any 6-digit code works for +65 ${mobile}` : `Sent to +65 ${mobile}`}
+                {demo ? `Demo: any 6-digit code works for +65 ${mobile}` : `Sent on WhatsApp to +65 ${mobile}`}
               </p>
               <input
                 id="signup-code"

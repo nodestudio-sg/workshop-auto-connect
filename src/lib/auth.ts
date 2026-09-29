@@ -1,24 +1,39 @@
 import { supabase } from "@/integrations/supabase/client";
 import { demoSignIn } from "@/lib/demo-mode";
+import { sendWhatsAppCode, verifyWhatsAppCode } from "@/lib/whatsapp-otp.functions";
 
 /** The 8-digit Singapore mobile, digits only. */
 export function cleanMobile(mobile: string): string {
   return mobile.replace(/\D/g, "");
 }
 
-/** E.164 form, as the SMS provider expects it. */
-function e164(mobile: string): string {
-  return `+65${cleanMobile(mobile)}`;
+/** A sign-in code failure, with a message the customer can act on. */
+export class CodeError extends Error {
+  constructor(public code: string) {
+    super(CODE_MESSAGES[code] ?? CODE_MESSAGES["SEND_FAILED"]);
+  }
 }
 
+const CODE_MESSAGES: Record<string, string> = {
+  NOT_CONFIGURED: "WhatsApp sign-in isn't switched on for this workshop yet.",
+  INVALID_MOBILE: "Please enter an 8-digit Singapore mobile number.",
+  UNKNOWN_WORKSHOP: "We couldn't find this workshop.",
+  TOO_MANY_REQUESTS: "A code was just sent. Please wait a moment before asking for another.",
+  SEND_FAILED: "We couldn't send a code just now. Please try again in a moment.",
+  CODE_EXPIRED: "That code has expired. Please ask for a new one.",
+  WRONG_CODE: "That code isn't right. Please check your WhatsApp and try again.",
+  TOO_MANY_ATTEMPTS: "Too many tries. Please ask for a new code.",
+  SIGN_IN_FAILED: "We couldn't sign you in just now. Please try again.",
+};
+
 /**
- * Step 1 of sign-in: text a one-time code to the number.
+ * Step 1 of sign-in: send a one-time code to the number on WhatsApp.
  * In demo mode nothing is sent.
  */
-export async function requestCode(mobile: string, demo: boolean): Promise<void> {
+export async function requestCode(slug: string, mobile: string, demo: boolean): Promise<void> {
   if (demo) return;
-  const { error } = await supabase.auth.signInWithOtp({ phone: e164(mobile) });
-  if (error) throw error;
+  const res = await sendWhatsAppCode({ data: { slug, mobile: cleanMobile(mobile) } });
+  if (!res.ok) throw new CodeError(res.error);
 }
 
 /**
@@ -35,12 +50,10 @@ export async function verifyCode(
   if (demo) {
     await demoSignIn(slug, cleanMobile(mobile));
   } else {
-    const { error } = await supabase.auth.verifyOtp({
-      phone: e164(mobile),
-      token: code,
-      type: "sms",
-    });
-    if (error) throw error;
+    const res = await verifyWhatsAppCode({ data: { mobile: cleanMobile(mobile), code } });
+    if (!res.ok) throw new CodeError(res.error);
+    const { error } = await supabase.auth.setSession(res.data);
+    if (error) throw new CodeError("SIGN_IN_FAILED");
   }
 
   const { error } = await supabase.rpc("link_customer", {
@@ -98,6 +111,11 @@ export async function signInWithEmail(slug: string, email: string, password: str
 /** Demo accounts use made-up emails; changing them would break the demo sign-in. */
 export function isDemoAccountEmail(email: string | null | undefined): boolean {
   return Boolean(email?.endsWith("@customer.workshopapp.sg"));
+}
+
+/** WhatsApp sign-in gives phone-only accounts a placeholder email; don't show it. */
+export function realEmail(email: string | null | undefined): string | null {
+  return !email || email.endsWith("@phone.workshopapp.sg") ? null : email;
 }
 
 /**

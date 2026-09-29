@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
   cleanMobile,
+  CodeError,
   NotACustomerError,
   requestCode,
   requestPasswordReset,
@@ -208,11 +209,15 @@ function MobileSignIn({
   async function sendCode() {
     setBusy(true);
     try {
-      await requestCode(mobile, demo);
+      await requestCode(slug, mobile, demo);
       setCode("");
       setStep("code");
-    } catch {
-      toast.error("We couldn't send a code just now. Please try again in a moment.");
+    } catch (error) {
+      toast.error(
+        error instanceof CodeError
+          ? error.message
+          : "We couldn't send a code just now. Please try again in a moment.",
+      );
     } finally {
       setBusy(false);
     }
@@ -223,8 +228,12 @@ function MobileSignIn({
     try {
       await verifyCode(slug, mobile, code, demo);
       onDone();
-    } catch {
-      toast.error("That code didn't work, or it has expired. Please try again.");
+    } catch (error) {
+      toast.error(
+        error instanceof CodeError
+          ? error.message
+          : "That code didn't work, or it has expired. Please try again.",
+      );
       setBusy(false);
     }
   }
@@ -258,7 +267,7 @@ function MobileSignIn({
         <p className="mt-2 text-xs text-muted-foreground">
           {demo
             ? "Demo: no code is sent. Any 6-digit code signs you in."
-            : "We'll send you a 6-digit code to sign in."}
+            : "We'll send a 6-digit code to your WhatsApp."}
         </p>
         <BrandButton type="submit" disabled={!mobileValid || busy || demoPending} className="mt-5">
           {busy ? "Sending…" : "Send code"}
@@ -278,7 +287,7 @@ function MobileSignIn({
         Enter the 6-digit code
       </label>
       <p className="mt-1 text-xs text-muted-foreground">
-        {demo ? `Demo: any 6-digit code works for +65 ${mobile}` : `Sent to +65 ${mobile}`}
+        {demo ? `Demo: any 6-digit code works for +65 ${mobile}` : `Sent on WhatsApp to +65 ${mobile}`}
       </p>
       <input
         id="code"

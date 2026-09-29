@@ -57,6 +57,13 @@
       "when": 1790673919806,
       "tag": "0007_vehicle_photos_private_read",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790697772779,
+      "tag": "0008_whatsapp_otp",
+      "breakpoints": true
     }
   ]
 }

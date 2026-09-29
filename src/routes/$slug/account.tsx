@@ -15,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCustomer } from "@/hooks/use-customer";
-import { isDemoAccountEmail, setEmailAndPassword, signOut } from "@/lib/auth";
+import { isDemoAccountEmail, realEmail, setEmailAndPassword, signOut } from "@/lib/auth";
 import { BrandButton, Loading, Pill, useWorkshop } from "@/components/app/workshop-ui";
 import { InstallHint } from "@/components/app/install-hint";
 import { PROFILE_ERRORS, ProfileForm } from "@/components/app/profile-form";
@@ -88,7 +88,7 @@ function Account() {
             </div>
           ) : (
             <EmailPasswordForm
-              currentEmail={email}
+              currentEmail={realEmail(email)}
               suggestedEmail={customer.email}
               onSaved={() => void userQuery.refetch()}
             />
