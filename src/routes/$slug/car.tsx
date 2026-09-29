@@ -23,6 +23,7 @@ import {
   VehicleSwitcher,
 } from "@/components/app/app-shell";
 import { cn } from "@/lib/utils";
+import { vehicleName } from "@/lib/vehicle-name";
 
 export const Route = createFileRoute("/$slug/car")({
   head: () => ({
@@ -74,7 +75,7 @@ function MyCar() {
               <div>
                 <NumberPlate plate={vehicle.plate} />
                 <p className="mt-2 text-base font-semibold">
-                  {vehicle.make} {vehicle.model}
+                  {vehicleName(vehicle.make, vehicle.model)}
                 </p>
                 <p className="text-sm text-muted-foreground">{vehicle.year}</p>
               </div>

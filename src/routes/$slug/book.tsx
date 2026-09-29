@@ -23,6 +23,7 @@ import {
 } from "@/components/app/workshop-ui";
 import { NumberPlate, VehicleSwitcher } from "@/components/app/app-shell";
 import { cn } from "@/lib/utils";
+import { vehicleName } from "@/lib/vehicle-name";
 
 export const Route = createFileRoute("/$slug/book")({
   head: () => ({
@@ -189,7 +190,7 @@ function BookService() {
               <div className="app-card flex items-center gap-3 p-4">
                 <NumberPlate plate={vehicle.plate} className="text-base" />
                 <p className="min-w-0 truncate text-sm font-medium">
-                  {vehicle.make} {vehicle.model}
+                  {vehicleName(vehicle.make, vehicle.model)}
                 </p>
               </div>
               {data.vehicles.length > 1 ? (

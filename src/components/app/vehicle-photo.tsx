@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { vehicleName } from "@/lib/vehicle-name";
 import sedan from "@/assets/car-sedan.png";
 import suv from "@/assets/car-suv.png";
 import mpv from "@/assets/car-mpv.png";
@@ -84,7 +85,7 @@ export function VehiclePhoto({
   return (
     <div className="relative -mx-2 mt-4 overflow-hidden rounded-3xl bg-gradient-to-b from-muted/40 to-muted">
       {custom ? (
-        <img src={custom} alt={`${vehicle.make} ${vehicle.model}`} className="aspect-[16/10] w-full object-cover" />
+        <img src={custom} alt={vehicleName(vehicle.make, vehicle.model)} className="aspect-[16/10] w-full object-cover" />
       ) : (
         <div className="relative">
           <img

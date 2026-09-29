@@ -38,6 +38,7 @@ import {
 } from "@/components/app/workshop-ui";
 import { directionsUrl, NumberPlate, phoneLinks } from "@/components/app/app-shell";
 import { cn } from "@/lib/utils";
+import { vehicleName } from "@/lib/vehicle-name";
 
 type Snapshot = { name: string; price: number; quote_after_inspection: boolean };
 
@@ -157,7 +158,7 @@ function RequestSent() {
               <div className="mt-3 flex items-center gap-3">
                 <NumberPlate plate={car.plate} className="text-sm" />
                 <span className="truncate text-sm text-muted-foreground">
-                  {car.make} {car.model}
+                  {vehicleName(car.make, car.model)}
                 </span>
               </div>
             ) : null}
