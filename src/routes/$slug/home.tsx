@@ -108,7 +108,7 @@ function Home() {
             to="/$slug/account"
             params={{ slug }}
             aria-label="Account"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-card text-sm font-semibold"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-card text-sm font-semibold shadow-sm"
           >
             {firstName?.[0]?.toUpperCase() ?? "?"}
           </Link>
@@ -163,7 +163,7 @@ function Home() {
             <p className="mt-1 text-sm text-muted-foreground">
               Add your plate to book services and keep its history in one place.
             </p>
-            <span className="mt-4 inline-flex min-h-[44px] items-center rounded-md bg-brand-strong px-5 text-sm font-semibold text-brand-foreground">
+            <span className="mt-4 inline-flex min-h-[44px] items-center rounded-full bg-brand-strong px-5 text-sm font-semibold text-brand-foreground">
               Add a car
             </span>
           </Link>
@@ -425,7 +425,7 @@ function UpcomingBooking({ slug, booking }: { slug: string; booking: BookingSumm
       >
         <div
           className={cn(
-            "flex w-14 shrink-0 flex-col items-center rounded-lg py-2",
+            "flex w-14 shrink-0 flex-col items-center rounded-2xl py-2",
             confirmed ? "bg-success-soft text-success" : "bg-attention-soft text-attention",
           )}
         >
