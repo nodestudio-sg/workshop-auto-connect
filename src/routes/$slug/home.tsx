@@ -99,7 +99,7 @@ function Home() {
         <header className="mx-auto flex min-h-[104px] w-full max-w-[420px] items-center gap-3 px-5 py-5">
           <WorkshopLogo workshop={workshop} size={40} />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{workshop.name}</p>
+            <p className="truncate text-[11px] font-semibold uppercase tracking-wider text-brand-foreground/75">{workshop.name}</p>
             <h1 className="mt-1 truncate text-xl">
               {greeting()}, {firstName}
             </h1>

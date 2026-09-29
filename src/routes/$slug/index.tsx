@@ -68,20 +68,22 @@ function SignInScreen() {
   const goHome = () => navigate({ to: "/$slug/home", params: { slug } });
 
   return (
-    <div className="flex min-h-[100dvh] flex-col px-5">
-      <div className="mx-auto w-full max-w-[380px] border-b border-border pb-8 pt-12">
-        <div className="flex items-center gap-4">
-          <WorkshopLogo workshop={workshop} size={52} />
-          <div className="min-w-0">
-            <h1 className="truncate text-xl">{workshop.name}</h1>
-            <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-              Customer service portal
-            </p>
+    <div className="flex min-h-[100dvh] flex-col">
+      <div className="brand-hero px-5">
+        <div className="mx-auto w-full max-w-[380px] pb-8 pt-12">
+          <div className="flex items-center gap-4">
+            <WorkshopLogo workshop={workshop} size={52} />
+            <div className="min-w-0">
+              <h1 className="truncate text-xl">{workshop.name}</h1>
+              <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.16em] text-brand-foreground/75">
+                Customer service portal
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
-      <main className="mx-auto w-full max-w-[380px] flex-1 pb-10 pt-8">
+      <main className="mx-auto w-full max-w-[380px] flex-1 px-5 pb-10 pt-8">
         <div className="app-card overflow-hidden">
           <div className="p-6">
             <h2 className="mb-5 text-lg">Sign in</h2>

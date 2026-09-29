@@ -138,8 +138,8 @@
 
 /* Brand-tinted hero behind the header on the sign-in and home screens. */
 @utility brand-hero {
-  background: var(--color-card);
-  color: var(--color-foreground);
-  border-bottom: 1px solid color-mix(in oklab, var(--color-border) 55%, transparent);
-  box-shadow: 0 12px 28px -20px color-mix(in oklab, var(--foreground) 14%, transparent);
+  background: linear-gradient(165deg, var(--brand-strong), var(--brand) 75%);
+  color: var(--brand-foreground);
+  border-radius: 0 0 var(--radius-3xl) var(--radius-3xl);
+  box-shadow: 0 16px 32px -20px color-mix(in oklab, var(--brand-strong) 60%, transparent);
 }
