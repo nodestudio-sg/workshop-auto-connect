@@ -21,6 +21,7 @@ export async function fetchWorkshopBranding(slug: string) {
   });
 
   const { data } = await supabase.from("workshops").select("*").eq("slug", slug).maybeSingle();
+  if (data && (data as Record<string, unknown>)["archived_at"]) return null;
   return data as {
     slug: string;
     name: string;

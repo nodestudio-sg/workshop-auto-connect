@@ -118,6 +118,9 @@ function RequestSent() {
   const confirmedDate = typeof row["confirmed_date"] === "string" ? row["confirmed_date"] : null;
   const confirmedTime = typeof row["confirmed_time"] === "string" ? row["confirmed_time"] : null;
   const notes = typeof row["customer_notes"] === "string" ? row["customer_notes"] : null;
+  // Migration 0009: the workshop's note when it confirms or declines.
+  const workshopMessage =
+    typeof row["workshop_message"] === "string" ? row["workshop_message"] : null;
   const car = row["vehicles"] as { plate: string; make: string; model: string } | null;
   const links = phoneLinks(workshop.phone);
 
@@ -130,6 +133,7 @@ function RequestSent() {
           workshopName={workshop.name}
           confirmedDate={confirmedDate}
           confirmedTime={confirmedTime}
+          workshopMessage={workshopMessage}
         />
 
         {data && (status === "requested" || status === "confirmed") ? (
@@ -244,12 +248,19 @@ function StatusCard({
   workshopName,
   confirmedDate,
   confirmedTime,
+  workshopMessage,
 }: {
   status: BookingStatus;
   workshopName: string;
   confirmedDate: string | null;
   confirmedTime: string | null;
+  workshopMessage?: string | null;
 }) {
+  const note = workshopMessage ? (
+    <p className="mt-3 rounded-2xl bg-card px-3 py-2 text-sm leading-relaxed">
+      <span className="font-semibold">{workshopName}:</span> {workshopMessage}
+    </p>
+  ) : null;
   if (status === "confirmed") {
     return (
       <Card className="bg-success-soft">
@@ -273,6 +284,7 @@ function StatusCard({
               ) : null}
               .
             </p>
+            {note}
           </div>
         </div>
       </Card>
@@ -296,6 +308,7 @@ function StatusCard({
                 ? `${workshopName} couldn't take this time. Please choose another, or call the workshop.`
                 : `This booking is cancelled. Call ${workshopName} if you need to rebook.`}
             </p>
+            {note}
           </div>
         </div>
       </Card>

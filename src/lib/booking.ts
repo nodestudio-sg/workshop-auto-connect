@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { notifyNewBooking } from "@/lib/admin.functions";
 import type { Service } from "@/lib/customer";
 
 export type BookingStatus = "requested" | "confirmed" | "declined" | "cancelled";
@@ -125,7 +126,7 @@ export async function submitBookingRequest(input: SubmitInput): Promise<string> 
     ({ data, error } = await rpc("submit_booking_request", args));
   }
 
-  if (!error && typeof data === "string") return data;
+  if (!error && typeof data === "string") return alertWorkshop(data);
   if (error?.message.includes("PRICES_CHANGED")) throw new PricesChangedError();
   if (error?.message.includes("SLOT_UNAVAILABLE")) throw new SlotUnavailableError();
   // PGRST202: the function doesn't exist yet because migration 0002 hasn't
@@ -155,5 +156,11 @@ export async function submitBookingRequest(input: SubmitInput): Promise<string> 
   if (insertError?.message.includes("PRICES_CHANGED")) throw new PricesChangedError();
   if (insertError?.message.includes("SLOT_UNAVAILABLE")) throw new SlotUnavailableError();
   if (insertError || !inserted) throw insertError ?? new Error("No booking id returned");
-  return inserted.id;
+  return alertWorkshop(inserted.id);
+}
+
+/** WhatsApp the workshop about the new booking (best-effort, never blocks). */
+function alertWorkshop(bookingId: string): string {
+  void notifyNewBooking({ data: { bookingId } }).catch(() => {});
+  return bookingId;
 }

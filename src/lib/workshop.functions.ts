@@ -46,6 +46,8 @@ export const getWorkshopBySlug = createServerFn({ method: "GET" })
     if (!workshop) return null;
 
     const row = workshop as Record<string, unknown>;
+    // Migration 0009: archived workshops are closed to customers.
+    if (row["archived_at"]) return null;
     return {
       id: String(row["id"]),
       slug: String(row["slug"]),

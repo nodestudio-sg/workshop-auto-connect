@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SlugRouteRouteImport } from './routes/$slug/route'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SlugIndexRouteImport } from './routes/$slug/index'
 import { Route as SlugAccountRouteImport } from './routes/$slug/account'
 import { Route as SlugAddCarRouteImport } from './routes/$slug/add-car'
@@ -25,7 +26,12 @@ import { Route as SlugResetPasswordRouteImport } from './routes/$slug/reset-pass
 import { Route as SlugSignUpRouteImport } from './routes/$slug/sign-up'
 import { Route as SlugTodayRouteImport } from './routes/$slug/today'
 import { Route as SlugWelcomeRouteImport } from './routes/$slug/welcome'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminAccountRouteImport } from './routes/admin/account'
+import { Route as AdminNewRouteImport } from './routes/admin/new'
 import { Route as SlugInvoiceJobIdRouteImport } from './routes/$slug/invoice.$jobId'
+import { Route as AdminPosterWorkshopIdRouteImport } from './routes/admin/poster.$workshopId'
+import { Route as AdminWWorkshopIdRouteImport } from './routes/admin/w.$workshopId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -35,6 +41,11 @@ const IndexRoute = IndexRouteImport.update({
 const SlugRouteRoute = SlugRouteRouteImport.update({
   id: '/$slug',
   path: '/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlugIndexRoute = SlugIndexRouteImport.update({
@@ -108,15 +119,41 @@ const SlugWelcomeRoute = SlugWelcomeRouteImport.update({
   path: '/welcome',
   getParentRoute: () => SlugRouteRoute,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAccountRoute = AdminAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNewRoute = AdminNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminRoute,
+} as any)
 const SlugInvoiceJobIdRoute = SlugInvoiceJobIdRouteImport.update({
   id: '/invoice/$jobId',
   path: '/invoice/$jobId',
   getParentRoute: () => SlugRouteRoute,
 } as any)
+const AdminPosterWorkshopIdRoute = AdminPosterWorkshopIdRouteImport.update({
+  id: '/poster/$workshopId',
+  path: '/poster/$workshopId',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminWWorkshopIdRoute = AdminWWorkshopIdRouteImport.update({
+  id: '/w/$workshopId',
+  path: '/w/$workshopId',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$slug': typeof SlugRouteRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/$slug/account': typeof SlugAccountRoute
   '/$slug/add-car': typeof SlugAddCarRoute
   '/$slug/book': typeof SlugBookRoute
@@ -130,8 +167,13 @@ export interface FileRoutesByFullPath {
   '/$slug/sign-up': typeof SlugSignUpRoute
   '/$slug/today': typeof SlugTodayRoute
   '/$slug/welcome': typeof SlugWelcomeRoute
+  '/admin/account': typeof AdminAccountRoute
+  '/admin/new': typeof AdminNewRoute
   '/$slug/': typeof SlugIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/$slug/invoice/$jobId': typeof SlugInvoiceJobIdRoute
+  '/admin/poster/$workshopId': typeof AdminPosterWorkshopIdRoute
+  '/admin/w/$workshopId': typeof AdminWWorkshopIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -148,13 +190,19 @@ export interface FileRoutesByTo {
   '/$slug/sign-up': typeof SlugSignUpRoute
   '/$slug/today': typeof SlugTodayRoute
   '/$slug/welcome': typeof SlugWelcomeRoute
+  '/admin/account': typeof AdminAccountRoute
+  '/admin/new': typeof AdminNewRoute
   '/$slug': typeof SlugIndexRoute
+  '/admin': typeof AdminIndexRoute
   '/$slug/invoice/$jobId': typeof SlugInvoiceJobIdRoute
+  '/admin/poster/$workshopId': typeof AdminPosterWorkshopIdRoute
+  '/admin/w/$workshopId': typeof AdminWWorkshopIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$slug': typeof SlugRouteRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/$slug/account': typeof SlugAccountRoute
   '/$slug/add-car': typeof SlugAddCarRoute
   '/$slug/book': typeof SlugBookRoute
@@ -168,14 +216,20 @@ export interface FileRoutesById {
   '/$slug/sign-up': typeof SlugSignUpRoute
   '/$slug/today': typeof SlugTodayRoute
   '/$slug/welcome': typeof SlugWelcomeRoute
+  '/admin/account': typeof AdminAccountRoute
+  '/admin/new': typeof AdminNewRoute
   '/$slug/': typeof SlugIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/$slug/invoice/$jobId': typeof SlugInvoiceJobIdRoute
+  '/admin/poster/$workshopId': typeof AdminPosterWorkshopIdRoute
+  '/admin/w/$workshopId': typeof AdminWWorkshopIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/$slug'
+    | '/admin'
     | '/$slug/account'
     | '/$slug/add-car'
     | '/$slug/book'
@@ -189,8 +243,13 @@ export interface FileRouteTypes {
     | '/$slug/sign-up'
     | '/$slug/today'
     | '/$slug/welcome'
+    | '/admin/account'
+    | '/admin/new'
     | '/$slug/'
+    | '/admin/'
     | '/$slug/invoice/$jobId'
+    | '/admin/poster/$workshopId'
+    | '/admin/w/$workshopId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -207,12 +266,18 @@ export interface FileRouteTypes {
     | '/$slug/sign-up'
     | '/$slug/today'
     | '/$slug/welcome'
+    | '/admin/account'
+    | '/admin/new'
     | '/$slug'
+    | '/admin'
     | '/$slug/invoice/$jobId'
+    | '/admin/poster/$workshopId'
+    | '/admin/w/$workshopId'
   id:
     | '__root__'
     | '/'
     | '/$slug'
+    | '/admin'
     | '/$slug/account'
     | '/$slug/add-car'
     | '/$slug/book'
@@ -226,13 +291,19 @@ export interface FileRouteTypes {
     | '/$slug/sign-up'
     | '/$slug/today'
     | '/$slug/welcome'
+    | '/admin/account'
+    | '/admin/new'
     | '/$slug/'
+    | '/admin/'
     | '/$slug/invoice/$jobId'
+    | '/admin/poster/$workshopId'
+    | '/admin/w/$workshopId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SlugRouteRoute: typeof SlugRouteRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -249,6 +320,13 @@ declare module '@tanstack/react-router' {
       path: '/$slug'
       fullPath: '/$slug'
       preLoaderRoute: typeof SlugRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$slug/': {
@@ -349,12 +427,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugWelcomeRouteImport
       parentRoute: typeof SlugRouteRoute
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/account': {
+      id: '/admin/account'
+      path: '/account'
+      fullPath: '/admin/account'
+      preLoaderRoute: typeof AdminAccountRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/new': {
+      id: '/admin/new'
+      path: '/new'
+      fullPath: '/admin/new'
+      preLoaderRoute: typeof AdminNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/$slug/invoice/$jobId': {
       id: '/$slug/invoice/$jobId'
       path: '/invoice/$jobId'
       fullPath: '/$slug/invoice/$jobId'
       preLoaderRoute: typeof SlugInvoiceJobIdRouteImport
       parentRoute: typeof SlugRouteRoute
+    }
+    '/admin/poster/$workshopId': {
+      id: '/admin/poster/$workshopId'
+      path: '/poster/$workshopId'
+      fullPath: '/admin/poster/$workshopId'
+      preLoaderRoute: typeof AdminPosterWorkshopIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/w/$workshopId': {
+      id: '/admin/w/$workshopId'
+      path: '/w/$workshopId'
+      fullPath: '/admin/w/$workshopId'
+      preLoaderRoute: typeof AdminWWorkshopIdRouteImport
+      parentRoute: typeof AdminRoute
     }
   }
 }
@@ -399,9 +512,28 @@ const SlugRouteRouteWithChildren = SlugRouteRoute._addFileChildren(
   SlugRouteRouteChildren,
 )
 
+interface AdminRouteChildren {
+  AdminAccountRoute: typeof AdminAccountRoute
+  AdminNewRoute: typeof AdminNewRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminPosterWorkshopIdRoute: typeof AdminPosterWorkshopIdRoute
+  AdminWWorkshopIdRoute: typeof AdminWWorkshopIdRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAccountRoute: AdminAccountRoute,
+  AdminNewRoute: AdminNewRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminPosterWorkshopIdRoute: AdminPosterWorkshopIdRoute,
+  AdminWWorkshopIdRoute: AdminWWorkshopIdRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SlugRouteRoute: SlugRouteRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

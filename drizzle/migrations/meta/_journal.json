@@ -64,6 +64,13 @@
       "when": 1790697772779,
       "tag": "0008_whatsapp_otp",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790700424047,
+      "tag": "0009_admin_console",
+      "breakpoints": true
     }
   ]
 }
