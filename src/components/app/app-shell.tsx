@@ -50,17 +50,22 @@ export function WorkshopLogo({
 }
 
 /** "SJT8888T" → "SJT 8888 T", in the style of a Singapore number plate. */
+/** Singapore-style black plate: silver characters, tight spacing, e.g. "SBA1234A". */
 export function NumberPlate({ plate, className }: { plate: string; className?: string }) {
-  const match = plate.replace(/\s/g, "").match(/^([A-Z]+)(\d+)([A-Z])$/i);
-  const text = match ? `${match[1]} ${match[2]} ${match[3]}` : plate;
+  const clean = plate.replace(/\s/g, "").toUpperCase();
+  const match = clean.match(/^([A-Z]+)(\d+)([A-Z])$/);
+  const groups = match ? [match[1], match[2], match[3]] : [clean];
   return (
     <span
+      aria-label={clean}
       className={cn(
-        "inline-flex items-center rounded-md bg-[oklch(0.21_0.03_265)] px-3 py-1 font-mono text-base font-bold tracking-[0.15em] text-white shadow-sm",
+        "plate inline-flex items-center gap-[0.18em] rounded-[5px] px-2.5 py-0.5 text-lg leading-none",
         className,
       )}
     >
-      {text.toUpperCase()}
+      {groups.map((g, i) => (
+        <span key={i}>{g}</span>
+      ))}
     </span>
   );
 }
