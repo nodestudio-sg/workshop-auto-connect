@@ -56,7 +56,7 @@ export function NumberPlate({ plate, className }: { plate: string; className?: s
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-lg border border-foreground/30 bg-card px-3 py-1 font-mono text-lg font-semibold tracking-[0.12em] text-foreground shadow-sm",
+        "inline-flex items-center rounded-md bg-[oklch(0.21_0.03_265)] px-3 py-1 font-mono text-base font-bold tracking-[0.15em] text-white shadow-sm",
         className,
       )}
     >
@@ -137,12 +137,12 @@ export function VehicleSwitcher({
             className={cn(
                "min-h-[40px] shrink-0 rounded-full border px-4 font-mono text-sm font-semibold tracking-wider transition-colors",
               onBrand
-                ? active
-                   ? "border-foreground bg-foreground text-card"
-                   : "border-border bg-card text-foreground"
-                : active
-                   ? "border-brand-strong bg-brand-strong text-brand-foreground"
-                  : "border-border bg-card",
+                 ? active
+                    ? "border-white/15 bg-white/10 text-white backdrop-blur-md"
+                    : "border-white/10 bg-white/5 text-white/80 backdrop-blur-md"
+                 : active
+                    ? "border-brand-strong bg-brand-strong text-brand-foreground"
+                   : "border-border bg-card",
             )}
           >
             {vehicle.plate}
@@ -154,7 +154,7 @@ export function VehicleSwitcher({
         params={{ slug }}
         className={cn(
            "flex min-h-[40px] shrink-0 items-center gap-1 rounded-full border border-dashed px-4 text-sm font-semibold",
-           onBrand ? "border-border bg-card text-foreground" : "border-brand/50 text-brand-strong",
+           onBrand ? "border-white/10 bg-white/5 text-white/80 backdrop-blur-md" : "border-brand/50 text-brand-strong",
         )}
       >
         <Plus className="h-4 w-4" /> Add car
