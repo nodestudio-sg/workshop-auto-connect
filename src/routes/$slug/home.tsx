@@ -32,6 +32,7 @@ import {
   WorkshopLogo,
 } from "@/components/app/app-shell";
 import { cn } from "@/lib/utils";
+import { VehiclePhoto } from "@/components/app/vehicle-photo";
 
 export const Route = createFileRoute("/$slug/home")({
   head: () => ({
@@ -96,7 +97,7 @@ function Home() {
   return (
     <>
       <div className="brand-hero">
-        <header className="mx-auto flex min-h-[104px] w-full max-w-[420px] items-center gap-3 px-5 py-5">
+        <header className={cn("mx-auto flex min-h-[104px] w-full max-w-[420px] items-center gap-3 px-5 pt-5", data.vehicles.length > 0 ? "pb-4" : "pb-14")}>
           <WorkshopLogo workshop={workshop} size={40} />
           <div className="min-w-0 flex-1">
             <p className="truncate text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">{workshop.name}</p>
@@ -114,7 +115,7 @@ function Home() {
           </Link>
         </header>
         {data.vehicles.length > 0 ? (
-          <div className="mx-auto w-full max-w-[420px] px-5 pb-5">
+          <div className="mx-auto w-full max-w-[420px] px-5 pb-14">
             <VehicleSwitcher
               slug={slug}
               vehicles={data.vehicles}
@@ -144,7 +145,8 @@ function Home() {
               </div>
               <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />
             </div>
-            <div className="mt-6 grid grid-cols-2 gap-4">
+            <VehiclePhoto vehicle={vehicle} />
+            <div className="mt-5 grid grid-cols-2 gap-4">
               <Stat icon={Gauge} label="Mileage" value={km(vehicle.mileage_km)} tone="indigo" />
               <Stat
                 icon={Wrench}

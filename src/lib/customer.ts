@@ -72,6 +72,7 @@ export type Vehicle = {
   oil_filter: string | null;
   next_service_due_date: string | null;
   next_service_due_km: number | null;
+  photo_url?: string | null;
 };
 
 export type Job = {
