@@ -22,6 +22,7 @@ export type Database = {
           created_at: string
           customer_id: string
           customer_notes: string | null
+          customer_notified_at: string | null
           estimate_total: number
           id: string
           idempotency_key: string | null
@@ -36,6 +37,8 @@ export type Database = {
           total_cents: number | null
           vehicle_id: string
           workshop_id: string
+          workshop_message: string | null
+          workshop_notified_at: string | null
         }
         Insert: {
           confirmed_at?: string | null
@@ -44,6 +47,7 @@ export type Database = {
           created_at?: string
           customer_id: string
           customer_notes?: string | null
+          customer_notified_at?: string | null
           estimate_total?: number
           id?: string
           idempotency_key?: string | null
@@ -58,6 +62,8 @@ export type Database = {
           total_cents?: number | null
           vehicle_id: string
           workshop_id: string
+          workshop_message?: string | null
+          workshop_notified_at?: string | null
         }
         Update: {
           confirmed_at?: string | null
@@ -66,6 +72,7 @@ export type Database = {
           created_at?: string
           customer_id?: string
           customer_notes?: string | null
+          customer_notified_at?: string | null
           estimate_total?: number
           id?: string
           idempotency_key?: string | null
@@ -80,6 +87,8 @@ export type Database = {
           total_cents?: number | null
           vehicle_id?: string
           workshop_id?: string
+          workshop_message?: string | null
+          workshop_notified_at?: string | null
         }
         Relationships: [
           {
@@ -246,6 +255,51 @@ export type Database = {
           },
         ]
       }
+      otp_codes: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          phone: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          phone: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          phone?: string
+        }
+        Relationships: []
+      }
+      platform_admins: {
+        Row: {
+          created_at: string
+          email: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           components: Json
@@ -395,9 +449,42 @@ export type Database = {
           },
         ]
       }
+      workshop_staff: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+          workshop_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id: string
+          workshop_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workshop_staff_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workshops: {
         Row: {
           address: string
+          archived_at: string | null
           booking_window_days: number
           brand_color: string
           created_at: string
@@ -416,6 +503,7 @@ export type Database = {
         }
         Insert: {
           address: string
+          archived_at?: string | null
           booking_window_days?: number
           brand_color?: string
           created_at?: string
@@ -434,6 +522,7 @@ export type Database = {
         }
         Update: {
           address?: string
+          archived_at?: string | null
           booking_window_days?: number
           brand_color?: string
           created_at?: string
