@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useQueryClient, type UseQueryResult } from "@tanstack/react-query";
-import { CalendarClock, Check, Loader2, MessageCircle, Phone, X } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { CalendarClock, Check, Loader2, MessageCircle, Phone, Wrench, X } from "lucide-react";
 import { toast } from "sonner";
 import { Pill } from "@/components/app/workshop-ui";
-import { adminConfirmBooking, adminDeclineBooking } from "@/lib/admin.functions";
+import { adminCheckIn, adminConfirmBooking, adminDeclineBooking } from "@/lib/admin.functions";
 import type { AdminBooking } from "@/lib/admin.server";
 import {
   errorText,
@@ -98,6 +99,24 @@ function BookingCard({ b, workshopId }: { b: AdminBooking; workshopId: string })
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const qc = useQueryClient();
+  const navigate = useNavigate();
+
+  async function checkIn() {
+    setBusy(true);
+    const res = await adminCheckIn({ data: { id: workshopId, input: { bookingId: b.id } } });
+    setBusy(false);
+    if (!res.ok) {
+      toast.error(errorText(res.error));
+      return;
+    }
+    toast.success("Checked in. The customer can follow it live in their app.");
+    await qc.invalidateQueries({ queryKey: ["admin"] });
+    void navigate({
+      to: "/admin/w/$workshopId",
+      params: { workshopId },
+      search: { tab: "board" },
+    });
+  }
 
   async function act(kind: "confirm" | "move" | "decline") {
     setBusy(true);
@@ -268,11 +287,36 @@ function BookingCard({ b, workshopId }: { b: AdminBooking; workshopId: string })
           </GhostButton>
         </div>
       ) : b.status === "confirmed" ? (
-        <div className="mt-3">
-          <GhostButton onClick={() => setMode("move")}>
-            <CalendarClock className="h-4 w-4" />
-            Change time
-          </GhostButton>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {b.job_id ? (
+            <GhostButton
+              onClick={() =>
+                void navigate({
+                  to: "/admin/w/$workshopId",
+                  params: { workshopId },
+                  search: { tab: "board" },
+                })
+              }
+            >
+              <Wrench className="h-4 w-4" />
+              On the workshop board
+            </GhostButton>
+          ) : (
+            <>
+              <PrimaryButton disabled={busy} onClick={() => void checkIn()}>
+                {busy ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Wrench className="h-4 w-4" />
+                )}
+                Check in car
+              </PrimaryButton>
+              <GhostButton onClick={() => setMode("move")}>
+                <CalendarClock className="h-4 w-4" />
+                Change time
+              </GhostButton>
+            </>
+          )}
         </div>
       ) : null}
     </Panel>

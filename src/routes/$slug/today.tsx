@@ -49,6 +49,8 @@ function Today() {
     queryKey: ["active-job", vehicle?.id],
     queryFn: () => fetchActiveJob(vehicle!.id),
     enabled: Boolean(vehicle?.id),
+    // The workshop updates the stages from /admin; keep the screen live.
+    refetchInterval: 15_000,
   });
 
   if (isLoading || !data) return <Loading />;
@@ -119,7 +121,7 @@ function Today() {
                   <div className="flex flex-col items-center">
                     <span
                       className={cn(
-                         "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-bold ring-4 ring-card",
+                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-bold ring-4 ring-card",
                         done && "border-brand bg-brand text-brand-foreground",
                         active && "border-attention bg-attention text-attention-foreground",
                         !done && !active && "border-border bg-card text-muted-foreground",

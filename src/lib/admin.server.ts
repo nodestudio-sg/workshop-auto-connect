@@ -10,7 +10,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 // The new tables aren't in the generated types until the migration has run.
-const db = () => supabaseAdmin as unknown as SupabaseClient;
+export const db = () => supabaseAdmin as unknown as SupabaseClient;
 
 export class AdminError extends Error {
   constructor(public code: string) {
@@ -58,12 +58,12 @@ async function requireRole(userId: string): Promise<Role> {
   if (!role) throw new AdminError("NO_ACCESS");
   return role;
 }
-async function requireMaster(userId: string) {
+export async function requireMaster(userId: string) {
   const role = await requireRole(userId);
   if (role.kind !== "master") throw new AdminError("NO_ACCESS");
   return role;
 }
-async function requireWorkshop(userId: string, workshopId: string) {
+export async function requireWorkshop(userId: string, workshopId: string) {
   const role = await requireRole(userId);
   if (role.kind === "owner" && !role.workshopIds.includes(workshopId))
     throw new AdminError("NO_ACCESS");
@@ -367,10 +367,20 @@ export async function setArchived(userId: string, workshopId: string, archived: 
 }
 
 /** Hard delete, only for workshops nobody has signed up to yet. */
-export async function deleteWorkshop(userId: string, workshopId: string) {
+/**
+ * Deletes a workshop. One with customers is only deleted when `confirmName`
+ * matches its name: that removes every customer, car, booking and job too.
+ */
+export async function deleteWorkshop(userId: string, workshopId: string, confirmName?: string) {
   await requireMaster(userId);
-  const cust = await db().from("customers").select("id").eq("workshop_id", workshopId).limit(1);
-  if ((cust.data ?? []).length) throw new AdminError("HAS_CUSTOMERS");
+  const [w, cust] = await Promise.all([
+    db().from("workshops").select("name").eq("id", workshopId).maybeSingle(),
+    db().from("customers").select("id").eq("workshop_id", workshopId).limit(1),
+  ]);
+  if (!w.data) throw new AdminError("NOT_FOUND");
+  const name = String((w.data as { name: string }).name);
+  if ((cust.data ?? []).length && confirmName?.trim() !== name)
+    throw new AdminError("HAS_CUSTOMERS");
   const { error } = await db().from("workshops").delete().eq("id", workshopId);
   if (error) throw new AdminError("FAILED");
 }
@@ -565,6 +575,8 @@ export type AdminBooking = {
   workshop_message: string | null;
   customer: { name: string; mobile: string; email: string | null } | null;
   vehicle: { plate: string; make: string; model: string } | null;
+  /** The workshop-board job this booking was checked in as, if any. */
+  job_id: string | null;
 };
 
 export async function listBookings(userId: string, workshopId: string): Promise<AdminBooking[]> {
@@ -579,12 +591,20 @@ export async function listBookings(userId: string, workshopId: string): Promise<
   const rows = (data ?? []) as Record<string, unknown>[];
   const cIds = [...new Set(rows.map((r) => String(r["customer_id"])))];
   const vIds = [...new Set(rows.map((r) => String(r["vehicle_id"])).filter((v) => v !== "null"))];
-  const [cs, vs] = await Promise.all([
+  const bIds = rows.map((r) => String(r["id"]));
+  const [cs, vs, js] = await Promise.all([
     cIds.length ? db().from("customers").select("*").in("id", cIds) : Promise.resolve({ data: [] }),
     vIds.length
       ? db().from("vehicles").select("id, plate, make, model").in("id", vIds)
       : Promise.resolve({ data: [] }),
+    // Before migration 0010 there is no booking_id, so this just returns nothing.
+    bIds.length
+      ? db().from("jobs").select("id, booking_id").in("booking_id", bIds)
+      : Promise.resolve({ data: [] }),
   ]);
+  const jMap = new Map(
+    ((js.data ?? []) as { id: string; booking_id: string }[]).map((j) => [j.booking_id, j.id]),
+  );
   const cMap = new Map(
     ((cs.data ?? []) as Record<string, unknown>[]).map((c) => [String(c["id"]), c]),
   );
@@ -618,11 +638,12 @@ export async function listBookings(userId: string, workshopId: string): Promise<
       vehicle: v
         ? { plate: String(v["plate"]), make: String(v["make"]), model: String(v["model"]) }
         : null,
+      job_id: jMap.get(String(r["id"])) ?? null,
     };
   });
 }
 
-async function bookingInWorkshop(bookingId: string) {
+export async function bookingInWorkshop(bookingId: string) {
   const { data } = await db()
     .from("booking_requests")
     .select("*")
@@ -707,7 +728,39 @@ export async function listCustomers(userId: string, workshopId: string) {
   }));
 }
 
+/** Removes a customer with their cars, bookings and job history. */
+export async function deleteCustomer(userId: string, customerId: string) {
+  const { data } = await db()
+    .from("customers")
+    .select("workshop_id")
+    .eq("id", customerId)
+    .maybeSingle();
+  if (!data) throw new AdminError("NOT_FOUND");
+  await requireWorkshop(userId, String((data as { workshop_id: string }).workshop_id));
+  const { error } = await db().from("customers").delete().eq("id", customerId);
+  if (error) throw new AdminError("FAILED");
+}
+
 // ---------------------------------------------------------------- WhatsApp alerts (optional)
+/**
+ * POSTs an alert to n8n (BOOKING_WEBHOOK_URL). Returns whether it was
+ * accepted; false when alerts aren't set up or the call failed.
+ */
+export async function postAlert(body: Record<string, unknown>): Promise<boolean> {
+  const url = process.env["BOOKING_WEBHOOK_URL"];
+  const secret = process.env["OTP_WEBHOOK_SECRET"];
+  if (!url || !secret) return false;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-nodestudio-secret": secret },
+      body: JSON.stringify(body),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
 /**
  * Tells n8n about a booking event so it can WhatsApp the workshop (new
  * request) or the customer (confirmed / declined). Does nothing unless
@@ -717,9 +770,7 @@ export async function notify(
   event: "booking_requested" | "booking_confirmed" | "booking_declined",
   bookingId: string,
 ) {
-  const url = process.env["BOOKING_WEBHOOK_URL"];
-  const secret = process.env["OTP_WEBHOOK_SECRET"];
-  if (!url || !secret) return;
+  if (!process.env["BOOKING_WEBHOOK_URL"]) return;
   try {
     const b = await bookingInWorkshop(bookingId);
     const [w, c, v] = await Promise.all([
@@ -745,31 +796,27 @@ export async function notify(
     const toWorkshop = event === "booking_requested";
     const workshopPhone = (ws?.phone ?? "").replace(/\D/g, "");
     const snap = (b["price_snapshot"] as { name?: string }[] | null) ?? [];
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "content-type": "application/json", "x-nodestudio-secret": secret },
-      body: JSON.stringify({
-        event,
-        to: toWorkshop
-          ? workshopPhone.length === 8
-            ? `65${workshopPhone}`
-            : workshopPhone
-          : `65${cu?.mobile ?? ""}`,
-        workshop: ws?.name,
-        workshop_slug: ws?.slug,
-        customer: cu?.name,
-        customer_phone: `65${cu?.mobile ?? ""}`,
-        vehicle: ve ? `${ve.plate} · ${ve.make} ${ve.model}` : null,
-        services: snap
-          .map((s) => s.name)
-          .filter(Boolean)
-          .join(", "),
-        date: b["confirmed_date"] ?? b["preferred_date"],
-        time: b["confirmed_time"] ?? b["preferred_time"],
-        message: b["workshop_message"] ?? null,
-      }),
+    const ok = await postAlert({
+      event,
+      to: toWorkshop
+        ? workshopPhone.length === 8
+          ? `65${workshopPhone}`
+          : workshopPhone
+        : `65${cu?.mobile ?? ""}`,
+      workshop: ws?.name,
+      workshop_slug: ws?.slug,
+      customer: cu?.name,
+      customer_phone: `65${cu?.mobile ?? ""}`,
+      vehicle: ve ? `${ve.plate} · ${ve.make} ${ve.model}` : null,
+      services: snap
+        .map((s) => s.name)
+        .filter(Boolean)
+        .join(", "),
+      date: b["confirmed_date"] ?? b["preferred_date"],
+      time: b["confirmed_time"] ?? b["preferred_time"],
+      message: b["workshop_message"] ?? null,
     });
-    if (res.ok) {
+    if (ok) {
       await db()
         .from("booking_requests")
         .update(

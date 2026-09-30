@@ -12,7 +12,7 @@ export const ADMIN_BRAND = {
 
 export const ERRORS: Record<string, string> = {
   NO_ACCESS: "This account doesn't have access here.",
-  NOT_SET_UP: "The admin console isn't set up yet: run migration 0009 in Lovable Cloud.",
+  NOT_SET_UP: "The database needs the latest SQL update (0009 / 0010). Run it in Lovable Cloud.",
   NOT_FOUND: "That wasn't found. It may have been removed.",
   NOT_CLAIMABLE: "That email isn't a master account, or it's already set up. Sign in instead.",
   WEAK_PASSWORD: "Use at least 8 characters for the password.",
@@ -32,7 +32,9 @@ export const ERRORS: Record<string, string> = {
   INVALID_EMAIL: "Please enter a valid email address.",
   INVALID_TIME: "Please choose a valid date and time.",
   NOT_OPEN: "This booking has already been answered.",
-  HAS_CUSTOMERS: "This workshop has customers, so it can't be deleted. Archive it instead.",
+  HAS_CUSTOMERS: "Type the workshop's exact name to delete it with all its customers.",
+  ALREADY_CHECKED_IN: "That car is already in the workshop.",
+  INVALID_STAGE: "That isn't a valid stage.",
   FAILED: "Something went wrong. Please try again.",
 };
 export const errorText = (code: string) => ERRORS[code] ?? ERRORS["FAILED"]!;

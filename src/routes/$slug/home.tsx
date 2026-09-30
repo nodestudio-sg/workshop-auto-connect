@@ -75,11 +75,14 @@ function Home() {
     queryKey: ["jobs", vehicle?.id],
     queryFn: () => fetchJobs(vehicle!.id),
     enabled: Boolean(vehicle?.id),
+    // Stages and confirmations change from /admin; keep the home screen live.
+    refetchInterval: 20_000,
   });
   const bookingsQuery = useQuery({
     queryKey: ["bookings", workshop.id],
     queryFn: () => fetchBookings(workshop.id),
     enabled: Boolean(data),
+    refetchInterval: 20_000,
   });
 
   if (isLoading || !data) return <Loading />;
@@ -98,10 +101,17 @@ function Home() {
   return (
     <>
       <div className="brand-hero">
-        <header className={cn("mx-auto flex min-h-[104px] w-full max-w-[420px] items-center gap-3 px-5 pt-5", data.vehicles.length > 0 ? "pb-4" : "pb-14")}>
+        <header
+          className={cn(
+            "mx-auto flex min-h-[104px] w-full max-w-[420px] items-center gap-3 px-5 pt-5",
+            data.vehicles.length > 0 ? "pb-4" : "pb-14",
+          )}
+        >
           <WorkshopLogo workshop={workshop} size={40} />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">{workshop.name}</p>
+            <p className="truncate text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">
+              {workshop.name}
+            </p>
             <h1 className="mt-1 truncate text-xl">
               {greeting()}, {firstName}
             </h1>
@@ -184,7 +194,13 @@ function Home() {
             <Action to="car" slug={slug} icon={History} label="History" tone="amber" />
             <Action to="bookings" slug={slug} icon={CalendarCheck2} label="Bookings" tone="sky" />
             <Action href={links.tel} icon={Phone} label="Call" tone="rose" />
-            <Action href={links.whatsapp} icon={MessageCircle} label="WhatsApp" tone="green" external />
+            <Action
+              href={links.whatsapp}
+              icon={MessageCircle}
+              label="WhatsApp"
+              tone="green"
+              external
+            />
             <Action
               href={directionsUrl(workshop.address)}
               icon={MapPin}
@@ -286,10 +302,14 @@ function Stat({
   return (
     <div className="rounded-2xl border border-border/60 bg-muted/50 p-4">
       <div className="mb-2 flex items-center gap-2">
-        <span className={cn("flex h-6 w-6 items-center justify-center rounded-lg", STAT_TONES[tone])}>
+        <span
+          className={cn("flex h-6 w-6 items-center justify-center rounded-lg", STAT_TONES[tone])}
+        >
           <Icon className="h-3.5 w-3.5" />
         </span>
-        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </p>
       </div>
       <p className="truncate text-lg font-bold">{value}</p>
     </div>
@@ -310,10 +330,7 @@ function IconBubble({
   } as const;
   return (
     <span
-      className={cn(
-        "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl",
-        tones[tone],
-      )}
+      className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl", tones[tone])}
     >
       <Icon className="h-5 w-5" />
     </span>
@@ -502,7 +519,12 @@ const ACTION_TONES = {
   slate: "bg-[oklch(0.21_0.03_265)] text-white border-transparent",
 } as const;
 
-type ActionProps = { icon: LucideIcon; label: string; primary?: boolean; tone?: keyof typeof ACTION_TONES } & (
+type ActionProps = {
+  icon: LucideIcon;
+  label: string;
+  primary?: boolean;
+  tone?: keyof typeof ACTION_TONES;
+} & (
   | { to: "book" | "today" | "car" | "bookings"; slug: string; href?: never; external?: never }
   | { href: string; external?: boolean; to?: never; slug?: never }
 );
@@ -521,7 +543,9 @@ function Action(props: ActionProps) {
       >
         <Icon className="h-6 w-6" />
       </span>
-      <span className="text-center text-[11px] font-bold leading-tight text-muted-foreground">{label}</span>
+      <span className="text-center text-[11px] font-bold leading-tight text-muted-foreground">
+        {label}
+      </span>
     </>
   );
   const className =

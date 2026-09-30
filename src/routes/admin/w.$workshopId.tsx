@@ -10,10 +10,12 @@ import {
   Tag,
   UserCog,
   Users,
+  Wrench,
 } from "lucide-react";
 import { Pill } from "@/components/app/workshop-ui";
 import { adminGetWorkshop, adminListBookings } from "@/lib/admin.functions";
 import { errorText, Panel, WorkshopMark } from "@/components/admin/admin-ui";
+import { BoardTab, useJobs } from "@/components/admin/board-tab";
 import { BookingsTab } from "@/components/admin/bookings-tab";
 import { CustomersTab } from "@/components/admin/customers-tab";
 import { ServicesTab } from "@/components/admin/services-tab";
@@ -22,9 +24,10 @@ import { ShareTab } from "@/components/admin/share-tab";
 import { OwnersTab } from "@/components/admin/owners-tab";
 import { cn } from "@/lib/utils";
 
-type Tab = "bookings" | "customers" | "services" | "branding" | "share" | "owners";
+type Tab = "bookings" | "board" | "customers" | "services" | "branding" | "share" | "owners";
 const TABS: { id: Tab; label: string; icon: typeof Users; master?: boolean }[] = [
   { id: "bookings", label: "Bookings", icon: CalendarCheck },
+  { id: "board", label: "Workshop board", icon: Wrench },
   { id: "customers", label: "Customers", icon: Users },
   { id: "services", label: "Services", icon: Tag },
   { id: "branding", label: "Branding & hours", icon: Palette },
@@ -63,6 +66,7 @@ function WorkshopConsole() {
     },
     refetchInterval: 30_000,
   });
+  const jobs = useJobs(workshopId);
   if (q.isLoading)
     return (
       <div className="grid place-items-center py-24 text-muted-foreground">
@@ -72,6 +76,7 @@ function WorkshopConsole() {
   if (q.error || !q.data) return <Panel>{errorText(q.error?.message ?? "NOT_FOUND")}</Panel>;
   const { workshop, role } = q.data;
   const pending = (bookings.data ?? []).filter((b) => b.status === "requested").length;
+  const inWorkshop = (jobs.data?.jobs ?? []).filter((j) => j.is_active).length;
   const tabs = TABS.filter((t) => !t.master || role === "master");
 
   return (
@@ -136,12 +141,18 @@ function WorkshopConsole() {
                   {pending}
                 </span>
               ) : null}
+              {t.id === "board" && inWorkshop ? (
+                <span className="rounded-full bg-brand px-1.5 text-[11px] font-bold text-white">
+                  {inWorkshop}
+                </span>
+              ) : null}
             </Link>
           ))}
         </div>
       </nav>
 
       {tab === "bookings" ? <BookingsTab workshopId={workshopId} query={bookings} /> : null}
+      {tab === "board" ? <BoardTab workshopId={workshopId} /> : null}
       {tab === "customers" ? <CustomersTab workshopId={workshopId} /> : null}
       {tab === "services" ? (
         <ServicesTab workshopId={workshopId} services={q.data.services} />

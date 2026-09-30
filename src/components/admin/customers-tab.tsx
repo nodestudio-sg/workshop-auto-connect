@@ -1,12 +1,32 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Loader2, MessageCircle, Search } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Loader2, MessageCircle, Search, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Pill } from "@/components/app/workshop-ui";
-import { adminListCustomers } from "@/lib/admin.functions";
+import { adminDeleteCustomer, adminListCustomers } from "@/lib/admin.functions";
 import { errorText, inputCls, Panel } from "@/components/admin/admin-ui";
 
 export function CustomersTab({ workshopId }: { workshopId: string }) {
   const [q, setQ] = useState("");
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const qc = useQueryClient();
+  async function remove(id: string, name: string) {
+    if (
+      !window.confirm(
+        `Delete ${name}? Their cars, bookings and service history are removed too. This can't be undone.`,
+      )
+    )
+      return;
+    setDeleting(id);
+    const r = await adminDeleteCustomer({ data: { customerId: id } });
+    setDeleting(null);
+    if (!r.ok) {
+      toast.error(errorText(r.error));
+      return;
+    }
+    toast.success(`${name} deleted.`);
+    await qc.invalidateQueries({ queryKey: ["admin"] });
+  }
   const query = useQuery({
     queryKey: ["admin", "customers", workshopId],
     queryFn: async () => {
@@ -104,6 +124,18 @@ export function CustomersTab({ workshopId }: { workshopId: string }) {
                 >
                   <MessageCircle className="h-4 w-4" />
                 </a>
+                <button
+                  onClick={() => void remove(c.id, c.name)}
+                  disabled={deleting === c.id}
+                  className="grid h-9 w-9 place-items-center rounded-full border border-border bg-card text-muted-foreground transition hover:text-destructive disabled:opacity-50"
+                  aria-label={`Delete ${c.name}`}
+                >
+                  {deleting === c.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </button>
               </li>
             ))}
           </ul>

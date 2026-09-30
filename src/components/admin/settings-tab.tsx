@@ -116,8 +116,15 @@ export function SettingsTab({
     await refresh();
   }
   async function remove() {
-    if (!window.confirm(`Delete ${w.name} for good? This can't be undone.`)) return;
-    const res = await adminDeleteWorkshop({ data: { id: w.id } });
+    const typed = window.prompt(
+      `Delete ${w.name} for good?\n\nThis also deletes all its customers, cars, bookings and service history. It can't be undone.\n\nType the workshop name to confirm:`,
+    );
+    if (typed == null) return;
+    if (typed.trim() !== w.name) {
+      toast.error("The name didn't match, so nothing was deleted.");
+      return;
+    }
+    const res = await adminDeleteWorkshop({ data: { id: w.id, confirmName: typed.trim() } });
     if (!res.ok) {
       toast.error(errorText(res.error));
       return;
@@ -365,7 +372,7 @@ export function SettingsTab({
               )}
               <GhostButton onClick={() => void remove()} className="text-destructive">
                 <Trash2 className="h-4 w-4" />
-                Delete (only if no customers)
+                Delete workshop
               </GhostButton>
             </div>
           </Panel>

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { ServiceInput, WorkshopInput } from "@/lib/admin.server";
+import type { ServiceInput, ServiceItem, WorkshopInput } from "@/lib/admin.server";
+import type { CheckInInput } from "@/lib/admin-jobs.server";
 
 /**
  * Browser-callable admin actions. Each one needs a signed-in user
@@ -19,6 +20,7 @@ async function run<T>(fn: () => Promise<T>): Promise<Result<T>> {
   }
 }
 const server = () => import("./admin.server");
+const jobs = () => import("./admin-jobs.server");
 
 // ---- master account setup (no sign-in yet)
 export const adminClaimStatus = createServerFn({ method: "POST" })
@@ -66,9 +68,9 @@ export const adminSetArchived = createServerFn({ method: "POST" })
 
 export const adminDeleteWorkshop = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string }) => d)
+  .inputValidator((d: { id: string; confirmName?: string }) => d)
   .handler(async ({ data, context }) =>
-    run(async () => (await server()).deleteWorkshop(context.userId, data.id)),
+    run(async () => (await server()).deleteWorkshop(context.userId, data.id, data.confirmName)),
   );
 
 export const adminUploadLogo = createServerFn({ method: "POST" })
@@ -166,4 +168,115 @@ export const notifyNewBooking = createServerFn({ method: "POST" })
   .inputValidator((d: { bookingId: string }) => d)
   .handler(async ({ data, context }) =>
     run(async () => (await server()).notifyNewBooking(context.userId, data.bookingId)),
+  );
+
+export const adminDeleteCustomer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { customerId: string }) => d)
+  .handler(async ({ data, context }) =>
+    run(async () => (await server()).deleteCustomer(context.userId, data.customerId)),
+  );
+
+// ---- workshop board (car tracking)
+export const adminListJobs = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data, context }) =>
+    run(async () => (await jobs()).listJobs(context.userId, data.id)),
+  );
+
+export const adminCheckIn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; input: CheckInInput }) => d)
+  .handler(async ({ data, context }) =>
+    run(async () => (await jobs()).checkIn(context.userId, data.id, data.input)),
+  );
+
+export const adminSetStage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { jobId: string; status: string }) => d)
+  .handler(async ({ data, context }) =>
+    run(async () => (await jobs()).setStage(context.userId, data.jobId, data.status)),
+  );
+
+export const adminSaveBill = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (d: {
+      jobId: string;
+      input: { title: string; mileage_km: number | null; line_items: ServiceItem[] };
+    }) => d,
+  )
+  .handler(async ({ data, context }) =>
+    run(async () => (await jobs()).saveBill(context.userId, data.jobId, data.input)),
+  );
+
+export const adminRequestExtraWork = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (d: {
+      jobId: string;
+      input: { title: string; reason: string; price: number; photos: string[] };
+    }) => d,
+  )
+  .handler(async ({ data, context }) =>
+    run(async () => (await jobs()).requestExtraWork(context.userId, data.jobId, data.input)),
+  );
+
+export const adminCancelExtraWork = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { jobId: string }) => d)
+  .handler(async ({ data, context }) =>
+    run(async () => (await jobs()).cancelExtraWork(context.userId, data.jobId)),
+  );
+
+export const adminUploadJobPhoto = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { jobId: string; dataUrl: string }) => d)
+  .handler(async ({ data, context }) =>
+    run(async () => (await jobs()).uploadJobPhoto(context.userId, data.jobId, data.dataUrl)),
+  );
+
+export const adminCompleteJob = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (d: {
+      jobId: string;
+      input: {
+        paid: boolean;
+        next_service_due_date: string | null;
+        next_service_due_km: number | null;
+      };
+    }) => d,
+  )
+  .handler(async ({ data, context }) =>
+    run(async () => (await jobs()).completeJob(context.userId, data.jobId, data.input)),
+  );
+
+export const adminSetPaid = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { jobId: string; paid: boolean }) => d)
+  .handler(async ({ data, context }) =>
+    run(async () => (await jobs()).setPaid(context.userId, data.jobId, data.paid)),
+  );
+
+export const adminReopenJob = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { jobId: string }) => d)
+  .handler(async ({ data, context }) =>
+    run(async () => (await jobs()).reopenJob(context.userId, data.jobId)),
+  );
+
+export const adminDeleteJob = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { jobId: string }) => d)
+  .handler(async ({ data, context }) =>
+    run(async () => (await jobs()).deleteJob(context.userId, data.jobId)),
+  );
+
+export const adminApproveExtraWork = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { jobId: string }) => d)
+  .handler(async ({ data, context }) =>
+    run(async () => (await jobs()).approveExtraWorkForCustomer(context.userId, data.jobId)),
   );
